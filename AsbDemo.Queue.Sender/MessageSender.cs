@@ -17,10 +17,10 @@ namespace AsbDemo.Queue.Sender
         private readonly QueueClient _client;
         private readonly TimeSpan _sleepTime;
 
-        public MessageSender(Settings settings)
+        public MessageSender(Options options)
         {
-            _client = CreateClient(settings.ConnectionString, settings.QueueName);
-            _sleepTime = settings.ProcessTime;
+            _client = CreateClient(options.ConnectionString, options.QueueName);
+            _sleepTime = options.ProcessTime;
         }
 
         private QueueClient CreateClient(string connectionString, string queueName)

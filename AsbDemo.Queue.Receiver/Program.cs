@@ -9,10 +9,11 @@ namespace AsbDemo.Queue.Receiver
         {
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
 
-            var settings = Settings.Parse(args);
-            settings.ConnectionString = Settings.CstrDemoReceiver;
+            var options = Options.Parse(args);
+            options.ConnectionString = Options.CstrDemoReceiver;
+            options.QueueName = Options.DemoQueueName;
 
-            var receiver = new MessageReceiver(settings);
+            var receiver = new MessageReceiver(options);
             receiver.ReceiveMessages();
 
             Console.ReadLine();

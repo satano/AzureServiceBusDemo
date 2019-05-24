@@ -14,13 +14,13 @@ namespace AsbDemo.Queue.Receiver
         private readonly string _receiverId = Guid.NewGuid().ToString();
         private readonly QueueClient _client;
         private readonly TimeSpan _processTime;
-        private readonly Settings _settings;
+        private readonly Options _options;
 
-        public MessageReceiver(Settings settings)
+        public MessageReceiver(Options options)
         {
-            _settings = settings;
-            _client = CreateClient(settings.ConnectionString, settings.QueueName);
-            _processTime = settings.ProcessTime;
+            _options = options;
+            _client = CreateClient(options.ConnectionString, options.QueueName);
+            _processTime = options.ProcessTime;
         }
 
         private QueueClient CreateClient(string connectionString, string queueName)
@@ -32,8 +32,8 @@ namespace AsbDemo.Queue.Receiver
         {
             var options = new MessageHandlerOptions(e => ExceptionReceivedHandler(e))
             {
-                AutoComplete = _settings.AutoComplete,
-                MaxConcurrentCalls = _settings.MaxConcurrentCalls
+                AutoComplete = _options.AutoComplete,
+                MaxConcurrentCalls = _options.MaxConcurrentCalls
             };
 
             _client.RegisterMessageHandler(async (message, token) =>

@@ -3,9 +3,9 @@ using System.Text.RegularExpressions;
 
 namespace AsbDemo.Core
 {
-    public class Settings
+    public class Options
     {
-        #region Settings
+        #region Options
 
         public string ConnectionString { get; set; }
         public string QueueName { get; set; }
@@ -30,15 +30,12 @@ namespace AsbDemo.Core
 
         private static readonly Regex _regex = new Regex("-(?<name>[a-z0-9]+) (?<value>[a-z0-9]+)", RegexOptions.IgnoreCase);
 
-        public static Settings Parse(string[] args)
-            => (args != null) && (args.Length > 0) ? Parse(string.Join(" ", args)) : new Settings() { QueueName = DemoQueueName };
+        public static Options Parse(string[] args)
+            => (args != null) && (args.Length > 0) ? Parse(string.Join(" ", args)) : new Options();
 
-        public static Settings Parse(string args)
+        public static Options Parse(string args)
         {
-            var result = new Settings
-            {
-                QueueName = DemoQueueName
-            };
+            var result = new Options();
 
             foreach (Match match in _regex.Matches(args))
             {

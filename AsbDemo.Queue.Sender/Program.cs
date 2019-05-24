@@ -13,12 +13,13 @@ namespace AsbDemo.Queue.Sender
         {
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
 
-            var settings = Settings.Parse(args);
-            settings.ConnectionString = Settings.CstrDemoSender;
+            var options = Options.Parse(args);
+            options.ConnectionString = Options.CstrDemoSender;
+            options.QueueName = Options.DemoQueueName;
 
             var tokenSource = new CancellationTokenSource();
 
-            _sender = new MessageSender(settings);
+            _sender = new MessageSender(options);
             var senderTask = Task.Run(() =>_sender.SendMessagesAsync(tokenSource.Token));
 
             Console.ReadLine();
