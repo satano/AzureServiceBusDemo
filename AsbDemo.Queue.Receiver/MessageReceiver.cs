@@ -30,6 +30,7 @@ namespace AsbDemo.Queue.Receiver
 
         public void ReceiveMessages()
         {
+            Helper.WriteLine($"Started receiving messages. Receiver ID: {_receiverId}{Environment.NewLine}", ConsoleColor.Magenta);
             var options = new MessageHandlerOptions(e => ExceptionReceivedHandler(e))
             {
                 AutoComplete = _options.AutoComplete,

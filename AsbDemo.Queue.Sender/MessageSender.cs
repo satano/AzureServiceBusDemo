@@ -30,6 +30,7 @@ namespace AsbDemo.Queue.Sender
 
         public async Task SendMessagesAsync(CancellationToken token)
         {
+            Helper.WriteLine($"Started sending messages. Sender ID: {_senderId}{Environment.NewLine}", ConsoleColor.Magenta);
             while (!token.IsCancellationRequested)
             {
                 Message message = CreateMessage();
