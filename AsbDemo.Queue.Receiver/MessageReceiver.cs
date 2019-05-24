@@ -56,5 +56,7 @@ namespace AsbDemo.Queue.Receiver
             Helper.WriteLine($"Exception: {e.Exception.Message}", ConsoleColor.Red);
             return Task.CompletedTask;
         }
+
+        public async Task CloseAsync() => await _client.CloseAsync();
     }
 }

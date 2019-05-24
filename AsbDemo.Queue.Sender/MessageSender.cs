@@ -53,5 +53,7 @@ namespace AsbDemo.Queue.Sender
                 TimeToLive = TimeSpan.FromMinutes(2)
             };
         }
+
+        public async Task CloseAsync() => await _client.CloseAsync();
     }
 }

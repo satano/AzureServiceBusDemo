@@ -27,6 +27,7 @@ namespace AsbDemo.Queue.Sender
             tokenSource.Cancel();
 
             await senderTask;
+            await _sender.CloseAsync();
         }
     }
 }
