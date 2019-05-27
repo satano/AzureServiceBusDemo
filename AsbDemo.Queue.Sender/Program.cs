@@ -7,7 +7,7 @@ namespace AsbDemo.Queue.Sender
 {
     class Program
     {
-        private static MessageSender _sender;
+        private static DemoMessageSender _sender;
 
         static async Task Main(string[] args)
         {
@@ -19,7 +19,7 @@ namespace AsbDemo.Queue.Sender
 
             var tokenSource = new CancellationTokenSource();
 
-            _sender = new MessageSender(options);
+            _sender = new DemoMessageSender(options);
             var senderTask = Task.Run(() =>_sender.SendMessagesAsync(tokenSource.Token));
 
             Console.ReadLine();

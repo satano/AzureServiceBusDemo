@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Sender
 {
-    class MessageSender
+    class DemoMessageSender
     {
         public const int DefaultSleepTimeInSeconds = 1;
 
@@ -17,7 +17,7 @@ namespace AsbDemo.Queue.Sender
         private readonly QueueClient _client;
         private readonly TimeSpan _sleepTime;
 
-        public MessageSender(Options options)
+        public DemoMessageSender(Options options)
         {
             _client = CreateClient(options.ConnectionString, options.QueueName);
             _sleepTime = options.ProcessTime;

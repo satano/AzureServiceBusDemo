@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Receiver
 {
-    class MessageReceiver
+    class DemoMessageReceiver
     {
         public const int DefaultSleepTimeInSeconds = 1;
 
@@ -16,7 +16,7 @@ namespace AsbDemo.Queue.Receiver
         private readonly TimeSpan _processTime;
         private readonly Options _options;
 
-        public MessageReceiver(Options options)
+        public DemoMessageReceiver(Options options)
         {
             _options = options;
             _client = CreateClient(options.ConnectionString, options.QueueName);
@@ -31,7 +31,7 @@ namespace AsbDemo.Queue.Receiver
         public void ReceiveMessages()
         {
             Helper.WriteLine($"Started receiving messages. Receiver ID: {_receiverId}{Environment.NewLine}", ConsoleColor.Magenta);
-            var options = new MessageHandlerOptions(e => ExceptionReceivedHandler(e))
+            var options = new MessageHandlerOptions(ExceptionReceivedHandler)
             {
                 AutoComplete = _options.AutoComplete,
                 MaxConcurrentCalls = _options.MaxConcurrentCalls
@@ -39,16 +39,25 @@ namespace AsbDemo.Queue.Receiver
 
             _client.RegisterMessageHandler(async (message, token) =>
             {
+                if (token.IsCancellationRequested)
+                {
+                    return;
+                }
 
                 DemoMessage receivedMessage = JsonConvert.DeserializeObject<DemoMessage>(Encoding.UTF8.GetString(message.Body));
+                await ProcessMessage(receivedMessage);
 
-                Helper.WriteLine($"{_receiverId} Received message: {receivedMessage.Value}", ConsoleColor.White);
-
-                await Task.Delay(_processTime);
-
-                await _client.CompleteAsync(message.SystemProperties.LockToken);
-
+                if (!token.IsCancellationRequested)
+                {
+                    await _client.CompleteAsync(message.SystemProperties.LockToken);
+                }
             }, options);
+        }
+
+        private async Task ProcessMessage(DemoMessage message)
+        {
+            Helper.WriteLine($"{_receiverId} Received message: {message.Value}", ConsoleColor.White);
+            await Task.Delay(_processTime);
         }
 
         private Task ExceptionReceivedHandler(ExceptionReceivedEventArgs e)
@@ -60,3 +69,4 @@ namespace AsbDemo.Queue.Receiver
         public async Task CloseAsync() => await _client.CloseAsync();
     }
 }
+;

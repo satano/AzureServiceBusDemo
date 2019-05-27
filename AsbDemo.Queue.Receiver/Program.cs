@@ -6,7 +6,7 @@ namespace AsbDemo.Queue.Receiver
 {
     class Program
     {
-        private static MessageReceiver _receiver;
+        private static DemoMessageReceiver _receiver;
 
         static async Task Main(string[] args)
         {
@@ -16,7 +16,7 @@ namespace AsbDemo.Queue.Receiver
             options.ConnectionString = Options.CstrDemoReceiver;
             options.QueueName = Options.DemoQueueName;
 
-            _receiver = new MessageReceiver(options);
+            _receiver = new DemoMessageReceiver(options);
             _receiver.ReceiveMessages();
 
             Console.ReadLine();
