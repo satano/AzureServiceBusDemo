@@ -4,6 +4,8 @@ namespace AsbDemo.Core
 {
     public static class Helper
     {
+        public const string PriorityKey = "Priority";
+
         public static void WriteLine(string message)
         {
             lock (Console.Out)

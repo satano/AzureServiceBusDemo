@@ -10,19 +10,24 @@ namespace AsbDemo.Core
         public string ConnectionString { get; set; }
         public string QueueName { get; set; }
         public string TopicName { get; set; }
+        public string SubscriptionName { get; set; }
 
         public TimeSpan ProcessTime { get; set; } = DefaultProcessTime;
         public bool AutoComplete { get; set; } = DefaultAutoComplete;
         public int MaxConcurrentCalls { get; set; } = DefaultMaxConcurrentCalls;
+        public Priority? Priority { get; set; } = null;
 
         #endregion
 
         #region Helpers
 
-        public static string DemoQueueName => "demo-queue";
-        public static string CstrDemoSender => "Endpoint=sb://kros-gabo-asb.servicebus.windows.net/;SharedAccessKeyName=SendOnly;SharedAccessKey=1CGiP6AWe7UAXuQktBBODQrcC6C9YdZjHxLg8jvTU7o=";
-        public static string CstrDemoReceiver => "Endpoint=sb://kros-gabo-asb.servicebus.windows.net/;SharedAccessKeyName=ListenOnly;SharedAccessKey=/hp3aDZXL3IlPuE+wqayr3YBuR6bgF8oG63H6iJx1nM=";
-        public static string CstrDemoTopic => "Endpoint=sb://kros-gabo-asb.servicebus.windows.net/;SharedAccessKeyName=AsbDemo;SharedAccessKey=IYgXqLqNykN+rYJNDCt1miPhcM8h2nf6NxHjCRIp3w4=;EntityPath=demo-topic";
+        public const string DemoQueueName = "demo-queue";
+        public const string CstrDemoSender = "Endpoint=sb://kros-gabo-asb.servicebus.windows.net/;SharedAccessKeyName=SendOnly;SharedAccessKey=1CGiP6AWe7UAXuQktBBODQrcC6C9YdZjHxLg8jvTU7o=";
+        public const string CstrDemoReceiver = "Endpoint=sb://kros-gabo-asb.servicebus.windows.net/;SharedAccessKeyName=ListenOnly;SharedAccessKey=/hp3aDZXL3IlPuE+wqayr3YBuR6bgF8oG63H6iJx1nM=";
+
+        public const string DemoTopicName = "demo-topic";
+        public const string DemoSubscriptionName = "demo-subscription";
+        public const string CstrManagement = "Endpoint=sb://kros-gabo-asb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=yLFRi2kLmN/mkduv6UZ3JvDk/51xRZgHlLudeopPoLc=";
 
         public static TimeSpan DefaultProcessTime => TimeSpan.FromSeconds(1);
         public static bool DefaultAutoComplete => false;
@@ -67,6 +72,13 @@ namespace AsbDemo.Core
                         {
                             result.MaxConcurrentCalls = maxConcurrentCalls;
                         }
+                    }
+                }
+                else if (nameof(Priority).Equals(argName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (Enum.TryParse(argValue, ignoreCase: true, out Priority priority))
+                    {
+                        result.Priority = priority;
                     }
                 }
             }

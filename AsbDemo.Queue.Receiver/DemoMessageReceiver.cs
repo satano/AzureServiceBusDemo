@@ -69,4 +69,3 @@ namespace AsbDemo.Queue.Receiver
         public async Task CloseAsync() => await _client.CloseAsync();
     }
 }
-;
