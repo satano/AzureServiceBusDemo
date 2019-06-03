@@ -16,6 +16,7 @@ namespace AsbDemo.Core
         public bool AutoComplete { get; set; } = DefaultAutoComplete;
         public int MaxConcurrentCalls { get; set; } = DefaultMaxConcurrentCalls;
         public Priority? Priority { get; set; } = null;
+        public string Postfix { get; set; } = null;
 
         #endregion
 
@@ -80,6 +81,10 @@ namespace AsbDemo.Core
                     {
                         result.Priority = priority;
                     }
+                }
+                else if (nameof(Postfix).Equals(argName, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.Postfix = string.IsNullOrWhiteSpace(argValue) ? null : argValue.Trim();
                 }
             }
             return result;

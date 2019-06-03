@@ -1,5 +1,7 @@
 ﻿using AsbDemo.Core;
+using Kros.Azure.ServiceBus.Management;
 using Microsoft.Azure.ServiceBus;
+using Microsoft.Azure.ServiceBus.Management;
 using Newtonsoft.Json;
 using System;
 using System.Text;
@@ -21,6 +23,17 @@ namespace AsbDemo.Topic.Sender
         {
             _client = CreateClient(options.ConnectionString, options.TopicName);
             _sleepTime = options.ProcessTime;
+        }
+
+        public static async Task CreateTopic(Options options)
+        {
+            var management = new ManagementClient(Options.CstrManagement);
+            await management.CreateTopicIfNotExistsAsync(
+                options.TopicName,
+                s =>
+                {
+                    s.DefaultMessageTimeToLive = TimeSpan.FromMinutes(3);
+                });
         }
 
         private TopicClient CreateClient(string connectionString, string topicName)

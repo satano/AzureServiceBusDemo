@@ -1,11 +1,10 @@
 ﻿using AsbDemo.Core;
 using Kros.Azure.ServiceBus;
+using Kros.Azure.ServiceBus.Management;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Management;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,21 +22,13 @@ namespace AsbDemo.Topic.Receiver
         public static async Task CreateSubscription(Options options)
         {
             var management = new ManagementClient(Options.CstrManagement);
-
-            if (await management.SubscriptionExistsAsync(options.TopicName, options.SubscriptionName))
-            {
-                Helper.WriteLine($"Subscription '{options.SubscriptionName}' already exists.", ConsoleColor.Magenta);
-            }
-            else
-            {
-                Helper.WriteLine($"Subscription '{options.SubscriptionName}' does not exist.", ConsoleColor.Magenta);
-                var subscription = new SubscriptionDescription(options.TopicName, options.SubscriptionName)
+            await management.CreateSubscriptionIfNotExistsAsync(
+                options.TopicName,
+                options.SubscriptionName,
+                s =>
                 {
-                    DefaultMessageTimeToLive = TimeSpan.FromMinutes(3),
-                };
-                await management.CreateSubscriptionAsync(subscription);
-                Helper.WriteLine($"Subscription '{options.SubscriptionName}' was created.", ConsoleColor.Magenta);
-            }
+                    s.DefaultMessageTimeToLive = TimeSpan.FromMinutes(3);
+                });
         }
 
         public DemoSubscriptionReceiver(Options options)

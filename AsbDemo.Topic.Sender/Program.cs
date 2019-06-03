@@ -17,6 +17,8 @@ namespace AsbDemo.Topic.Sender
             options.ConnectionString = Options.CstrDemoSender;
             options.TopicName = Options.DemoTopicName;
 
+            await DemoTopicSender.CreateTopic(options);
+
             var tokenSource = new CancellationTokenSource();
 
             _sender = new DemoTopicSender(options);

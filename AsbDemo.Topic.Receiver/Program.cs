@@ -1,5 +1,4 @@
 ﻿using AsbDemo.Core;
-using Microsoft.Azure.ServiceBus;
 using System;
 using System.Threading.Tasks;
 
@@ -17,6 +16,11 @@ namespace AsbDemo.Topic.Receiver
             options.ConnectionString = Options.CstrDemoReceiver;
             options.TopicName = Options.DemoTopicName;
             options.SubscriptionName = Options.DemoSubscriptionName;
+
+            if (!string.IsNullOrWhiteSpace(options.Postfix))
+            {
+                options.SubscriptionName += "-" + options.Postfix;
+            }
 
             if (options.Priority.HasValue && (options.Priority != Priority.Default))
             {
