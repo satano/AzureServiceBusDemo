@@ -7,30 +7,22 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Receiver
 {
-    class DemoMessageReceiver
+    class DemoMessageReceiver : IReceiver
     {
         public const int DefaultSleepTimeInSeconds = 1;
 
-        private readonly string _receiverId = Guid.NewGuid().ToString();
         private readonly QueueClient _client;
-        private readonly TimeSpan _processTime;
         private readonly Options _options;
 
         public DemoMessageReceiver(Options options)
         {
             _options = options;
-            _client = CreateClient(options.ConnectionString, options.QueueName);
-            _processTime = options.ProcessTime;
+            _client = new QueueClient(options.ConnectionString, options.QueueName);
         }
 
-        private QueueClient CreateClient(string connectionString, string queueName)
+        public void StartReceivingMessages()
         {
-            return new QueueClient(connectionString, queueName);
-        }
-
-        public void ReceiveMessages()
-        {
-            Helper.WriteLine($"Started receiving messages. Receiver ID: {_receiverId}{Environment.NewLine}", ConsoleColor.Magenta);
+            Helper.WriteLine($"Started receiving messages.{Environment.NewLine}", ConsoleColor.Magenta);
             var options = new MessageHandlerOptions(ExceptionReceivedHandler)
             {
                 AutoComplete = _options.AutoComplete,
@@ -56,8 +48,8 @@ namespace AsbDemo.Queue.Receiver
 
         private async Task ProcessMessage(DemoMessage message)
         {
-            Helper.WriteLine($"{_receiverId} Received message: {message.Value}", ConsoleColor.White);
-            await Task.Delay(_processTime);
+            Helper.WriteLine($"Received message: {message.Id} | {message.Value}", ConsoleColor.White);
+            await Task.Delay(_options.ProcessTime);
         }
 
         private Task ExceptionReceivedHandler(ExceptionReceivedEventArgs e)

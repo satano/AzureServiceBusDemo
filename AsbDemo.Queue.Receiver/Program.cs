@@ -1,4 +1,5 @@
 ﻿using AsbDemo.Core;
+using MassTransit.Transports;
 using System;
 using System.Threading.Tasks;
 
@@ -6,8 +7,6 @@ namespace AsbDemo.Queue.Receiver
 {
     class Program
     {
-        private static DemoMessageReceiver _receiver;
-
         static async Task Main(string[] args)
         {
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
@@ -16,12 +15,19 @@ namespace AsbDemo.Queue.Receiver
             options.ConnectionString = Consts.CstrManagement;
             options.QueueName = Consts.DemoQueueName;
 
-            _receiver = new DemoMessageReceiver(options);
-            _receiver.ReceiveMessages();
+            IReceiver receiver = ReceiveUsingAzure(options);
 
             Console.ReadLine();
             Helper.WriteLine("Finishing...", ConsoleColor.Green);
-            await _receiver.CloseAsync();
+
+            await receiver.CloseAsync();
+        }
+
+        static DemoMessageReceiver ReceiveUsingAzure(Options options)
+        {
+            var receiver = new DemoMessageReceiver(options);
+            receiver.StartReceivingMessages();
+            return receiver;
         }
     }
 }

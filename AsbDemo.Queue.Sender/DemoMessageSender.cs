@@ -1,5 +1,7 @@
 ﻿using AsbDemo.Core;
+using Kros.Azure.ServiceBus.Management;
 using Microsoft.Azure.ServiceBus;
+using Microsoft.Azure.ServiceBus.Management;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +19,9 @@ namespace AsbDemo.Queue.Sender
 
         public async Task StartSending()
         {
+            var management = new ManagementClient(_options.ConnectionString);
+            await management.CreateQueueIfNotExistsAsync(_options.QueueName);
+
             var client = new QueueClient(_options.ConnectionString, _options.QueueName);
             var tokenSource = new CancellationTokenSource();
             var senderTask = Task.Run(() => SendMessagesAsync(client, tokenSource.Token));
