@@ -21,7 +21,7 @@ namespace AsbDemo.Topic.Receiver
 
         public static async Task CreateSubscription(Options options)
         {
-            var management = new ManagementClient(Options.CstrManagement);
+            var management = new ManagementClient(Consts.CstrManagement);
             await management.CreateSubscriptionIfNotExistsAsync(
                 options.TopicName,
                 options.SubscriptionName,

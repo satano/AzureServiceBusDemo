@@ -15,7 +15,6 @@ namespace AsbDemo.Topic.Sender
         public const int DefaultSleepTimeInSeconds = 1;
 
         private readonly string _senderId = Guid.NewGuid().ToString();
-        private int _messageCounter = 0;
         private readonly TopicClient _client;
         private readonly TimeSpan _sleepTime;
 
@@ -27,7 +26,7 @@ namespace AsbDemo.Topic.Sender
 
         public static async Task CreateTopic(Options options)
         {
-            var management = new ManagementClient(Options.CstrManagement);
+            var management = new ManagementClient(Consts.CstrManagement);
             await management.CreateTopicIfNotExistsAsync(
                 options.TopicName,
                 s =>
@@ -60,13 +59,11 @@ namespace AsbDemo.Topic.Sender
 
         private Message CreateMessage(Priority priority)
         {
-            int currentCounter = Interlocked.Increment(ref _messageCounter);
-            var message = new DemoMessage() { Value = $"Hello world - {currentCounter}" };
-
-            var sbMessage = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message)))
+            DemoMessage demoMsg = Helper.CreateMessage();
+            var sbMessage = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(demoMsg)))
             {
                 ContentType = "application/json",
-                MessageId = currentCounter.ToString(),
+                MessageId = demoMsg.Id,
                 TimeToLive = TimeSpan.FromMinutes(2)
             };
             if (priority != Priority.Default)

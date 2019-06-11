@@ -13,9 +13,9 @@ namespace AsbDemo.Topic.Receiver
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
 
             var options = Options.Parse(args);
-            options.ConnectionString = Options.CstrDemoReceiver;
-            options.TopicName = Options.DemoTopicName;
-            options.SubscriptionName = Options.DemoSubscriptionName;
+            options.ConnectionString = Consts.CstrManagement;
+            options.TopicName = Consts.DemoTopicName;
+            options.SubscriptionName = Consts.DemoSubscriptionName;
 
             if (!string.IsNullOrWhiteSpace(options.Postfix))
             {

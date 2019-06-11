@@ -13,8 +13,8 @@ namespace AsbDemo.Queue.Receiver
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
 
             var options = Options.Parse(args);
-            options.ConnectionString = Options.CstrDemoReceiver;
-            options.QueueName = Options.DemoQueueName;
+            options.ConnectionString = Consts.CstrManagement;
+            options.QueueName = Consts.DemoQueueName;
 
             _receiver = new DemoMessageReceiver(options);
             _receiver.ReceiveMessages();

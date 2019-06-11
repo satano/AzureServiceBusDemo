@@ -1,8 +1,6 @@
 ﻿using AsbDemo.Core;
 using Microsoft.Azure.ServiceBus;
-using Newtonsoft.Json;
 using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,50 +8,38 @@ namespace AsbDemo.Queue.Sender
 {
     class DemoMessageSender
     {
-        public const int DefaultSleepTimeInSeconds = 1;
-
-        private readonly string _senderId = Guid.NewGuid().ToString();
-        private int _messageCounter = 0;
-        private readonly QueueClient _client;
-        private readonly TimeSpan _sleepTime;
+        private readonly Options _options;
 
         public DemoMessageSender(Options options)
         {
-            _client = CreateClient(options.ConnectionString, options.QueueName);
-            _sleepTime = options.ProcessTime;
+            _options = options;
         }
 
-        private QueueClient CreateClient(string connectionString, string queueName)
+        public async Task StartSending()
         {
-            return new QueueClient(connectionString, queueName);
+            var client = new QueueClient(_options.ConnectionString, _options.QueueName);
+            var tokenSource = new CancellationTokenSource();
+            var senderTask = Task.Run(() => SendMessagesAsync(client, tokenSource.Token));
+
+            Console.ReadLine();
+            Helper.WriteLine("Finishing...", ConsoleColor.Green);
+            tokenSource.Cancel();
+
+            await senderTask;
+            await client.CloseAsync();
         }
 
-        public async Task SendMessagesAsync(CancellationToken token)
+        private async Task SendMessagesAsync(QueueClient client, CancellationToken token)
         {
-            Helper.WriteLine($"Started sending messages. Sender ID: {_senderId}{Environment.NewLine}", ConsoleColor.Magenta);
+            Helper.WriteLine($"Started sending messages.{Environment.NewLine}", ConsoleColor.Magenta);
             while (!token.IsCancellationRequested)
             {
-                Message message = CreateMessage();
-                await _client.SendAsync(message);
+                Message message = Helper.CreateAzureMessage();
+                await client.SendAsync(message);
 
-                Helper.WriteLine($"Sender Id: {_senderId}, Message Id: {message.MessageId}", ConsoleColor.Yellow);
-                await Task.Delay(_sleepTime);
+                Helper.WriteLine($"Message sent: Id = {message.MessageId}", ConsoleColor.Yellow);
+                await Task.Delay(_options.ProcessTime);
             }
         }
-
-        private Message CreateMessage()
-        {
-            int currentCounter = Interlocked.Increment(ref _messageCounter);
-            var message = new DemoMessage() { Value = $"Lorem ipsum {_senderId} - {currentCounter}" };
-
-            return new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message)))
-            {
-                ContentType = "application/json",
-                MessageId = currentCounter.ToString(),
-                TimeToLive = TimeSpan.FromMinutes(2)
-            };
-        }
-
-        public async Task CloseAsync() => await _client.CloseAsync();
     }
 }

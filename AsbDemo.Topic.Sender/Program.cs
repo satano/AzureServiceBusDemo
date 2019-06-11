@@ -14,8 +14,8 @@ namespace AsbDemo.Topic.Sender
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
 
             var options = Options.Parse(args);
-            options.ConnectionString = Options.CstrDemoSender;
-            options.TopicName = Options.DemoTopicName;
+            options.ConnectionString = Consts.CstrManagement;
+            options.TopicName = Consts.DemoTopicName;
 
             await DemoTopicSender.CreateTopic(options);
 

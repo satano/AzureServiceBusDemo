@@ -1,33 +1,33 @@
 ﻿using AsbDemo.Core;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Sender
 {
     class Program
     {
-        private static DemoMessageSender _sender;
-
         static async Task Main(string[] args)
         {
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
 
             var options = Options.Parse(args);
-            options.ConnectionString = Options.CstrDemoSender;
-            options.QueueName = Options.DemoQueueName;
+            options.ConnectionString = Consts.CstrManagement;
+            options.QueueName = Consts.DemoQueueName;
 
-            var tokenSource = new CancellationTokenSource();
+            await SendUsingMassTransit(options);
+            //await SendUsingAzure(options);
+        }
 
-            _sender = new DemoMessageSender(options);
-            var senderTask = Task.Run(() =>_sender.SendMessagesAsync(tokenSource.Token));
+        static async Task SendUsingAzure(Options options)
+        {
+            var sender = new DemoMessageSender(options);
+            await sender.StartSending();
+        }
 
-            Console.ReadLine();
-            Helper.WriteLine("Finishing...", ConsoleColor.Green);
-            tokenSource.Cancel();
-
-            await senderTask;
-            await _sender.CloseAsync();
+        static async Task SendUsingMassTransit(Options options)
+        {
+            var sender = new MassTransitMessageSender(options);
+            await sender.StartSending();
         }
     }
 }

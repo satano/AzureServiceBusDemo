@@ -22,14 +22,6 @@ namespace AsbDemo.Core
 
         #region Helpers
 
-        public const string DemoQueueName = "demo-queue";
-        public const string CstrDemoSender = "Endpoint=sb://kros-gabo-asb.servicebus.windows.net/;SharedAccessKeyName=SendOnly;SharedAccessKey=1CGiP6AWe7UAXuQktBBODQrcC6C9YdZjHxLg8jvTU7o=";
-        public const string CstrDemoReceiver = "Endpoint=sb://kros-gabo-asb.servicebus.windows.net/;SharedAccessKeyName=ListenOnly;SharedAccessKey=/hp3aDZXL3IlPuE+wqayr3YBuR6bgF8oG63H6iJx1nM=";
-
-        public const string DemoTopicName = "demo-topic";
-        public const string DemoSubscriptionName = "demo-subscription";
-        public const string CstrManagement = "Endpoint=sb://kros-gabo-asb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=yLFRi2kLmN/mkduv6UZ3JvDk/51xRZgHlLudeopPoLc=";
-
         public static TimeSpan DefaultProcessTime => TimeSpan.FromSeconds(1);
         public static bool DefaultAutoComplete => false;
         public static int DefaultMaxConcurrentCalls => 1;
