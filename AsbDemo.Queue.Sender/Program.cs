@@ -14,8 +14,8 @@ namespace AsbDemo.Queue.Sender
             options.ConnectionString = Consts.CstrManagement;
             options.QueueName = Consts.DemoQueueName;
 
-            //await SendUsingMassTransit(options);
-            await SendUsingAzure(options);
+            await SendUsingMassTransit(options);
+            //await SendUsingAzure(options);
         }
 
         static async Task SendUsingAzure(Options options)

@@ -15,7 +15,8 @@ namespace AsbDemo.Queue.Receiver
             options.ConnectionString = Consts.CstrManagement;
             options.QueueName = Consts.DemoQueueName;
 
-            IReceiver receiver = ReceiveUsingAzure(options);
+            //IReceiver receiver = await ReceiveUsingAzure(options);
+            IReceiver receiver = await ReceiveUsingMassTransit(options);
 
             Console.ReadLine();
             Helper.WriteLine("Finishing...", ConsoleColor.Green);
@@ -23,10 +24,17 @@ namespace AsbDemo.Queue.Receiver
             await receiver.CloseAsync();
         }
 
-        static DemoMessageReceiver ReceiveUsingAzure(Options options)
+        static async Task<DemoMessageReceiver> ReceiveUsingAzure(Options options)
         {
             var receiver = new DemoMessageReceiver(options);
             receiver.StartReceivingMessages();
+            return await Task.FromResult(receiver);
+        }
+
+        static async Task<MassTransitMessageReceiver> ReceiveUsingMassTransit(Options options)
+        {
+            var receiver = new MassTransitMessageReceiver(options);
+            await receiver.StartReceivingMessages();
             return receiver;
         }
     }
