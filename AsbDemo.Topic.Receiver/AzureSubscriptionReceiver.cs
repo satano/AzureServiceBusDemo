@@ -15,13 +15,6 @@ namespace AsbDemo.Topic.Receiver
         private readonly Options _options;
         private SubscriptionClient _client;
 
-        internal static async Task ProcessMessage(DemoMessage message, TimeSpan processTime, Priority? priority)
-        {
-            string priorityStr = priority.HasValue ? priority.ToString() : string.Empty;
-            Helper.WriteLine($"Received message: {message.Value}, priority = {priorityStr}", ConsoleColor.White);
-            await Task.Delay(processTime);
-        }
-
         private static async Task CreateSubscription(string topicName, string subscriptionName)
         {
             var management = new ManagementClient(Consts.CstrManagement);
@@ -90,12 +83,9 @@ namespace AsbDemo.Topic.Receiver
                 Priority? priority = null;
                 if (message.UserProperties.TryGetValue(Helper.PriorityKey, out object priorityStr))
                 {
-                    if (Enum.TryParse((string)priorityStr, out Priority msgPriority))
-                    {
-                        priority = msgPriority;
-                    }
+                    priority = Program.ParsePriority((string)priorityStr);
                 }
-                await ProcessMessage(receivedMessage, _options.ProcessTime, priority);
+                await Program.ProcessMessage(receivedMessage, _options.ProcessTime, priority);
 
                 if (!token.IsCancellationRequested)
                 {
