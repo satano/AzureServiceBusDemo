@@ -13,8 +13,8 @@ namespace AsbDemo.Topic.Sender
 
             var options = Options.Parse(args);
 
-            //ISender sender = new DemoTopicSender(options);
-            ISender sender = new MassTransitMessageSender(options);
+            ISender sender = new AzureTopicSender(options);
+            //ISender sender = new MassTransitMessageSender(options);
 
             Helper.WriteLine($"Sender type: {sender.GetType().Name}", ConsoleColor.Yellow);
             var tokenSource = new CancellationTokenSource();

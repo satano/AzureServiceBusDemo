@@ -10,54 +10,54 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Topic.Receiver
 {
-    class DemoSubscriptionReceiver
+    class AzureSubscriptionReceiver : IReceiver
     {
-        public const int DefaultSleepTimeInSeconds = 1;
-
-        private readonly string _receiverId = Guid.NewGuid().ToString();
-        private readonly SubscriptionClient _client;
-        private readonly TimeSpan _processTime;
         private readonly Options _options;
+        private SubscriptionClient _client;
 
-        public static async Task CreateSubscription(Options options)
+        internal static async Task ProcessMessage(DemoMessage message, TimeSpan processTime, Priority? priority)
+        {
+            string priorityStr = priority.HasValue ? priority.ToString() : string.Empty;
+            Helper.WriteLine($"Received message: {message.Value}, priority = {priorityStr}", ConsoleColor.White);
+            await Task.Delay(processTime);
+        }
+
+        private static async Task CreateSubscription(string topicName, string subscriptionName)
         {
             var management = new ManagementClient(Consts.CstrManagement);
             await management.CreateSubscriptionIfNotExistsAsync(
-                options.TopicName,
-                options.SubscriptionName,
+                topicName,
+                subscriptionName,
                 s =>
                 {
                     s.DefaultMessageTimeToLive = TimeSpan.FromMinutes(3);
                 });
         }
 
-        public DemoSubscriptionReceiver(Options options)
+        public AzureSubscriptionReceiver(Options options)
         {
             _options = options;
-            _client = CreateClient(options).GetAwaiter().GetResult();
-            _processTime = options.ProcessTime;
         }
 
-        private async Task<SubscriptionClient> CreateClient(Options options)
+        private async Task<SubscriptionClient> CreateClient()
         {
             RuleDescription rule = null;
-            if (options.Priority.HasValue && (options.Priority != Priority.Default))
+            if (_options.Priority.HasValue && (_options.Priority != Priority.Default))
             {
-                string priorityStr = options.Priority.Value.ToString();
-                Filter filter = new SqlFilter($"Priority = '{priorityStr}'");
+                string priorityStr = _options.Priority.Value.ToString();
+                //Filter filter = new SqlFilter($"Priority = '{priorityStr}'");
 
                 var correlationFilter = new CorrelationFilter();
                 correlationFilter.Properties["Priority"] = priorityStr;
-                filter = correlationFilter;
 
                 rule = new RuleDescription()
                 {
                     Name = $"Priority-{priorityStr}",
-                    Filter = filter
+                    Filter = correlationFilter
                 };
             }
 
-            var subscription = new SubscriptionClient(options.ConnectionString, options.TopicName, options.SubscriptionName);
+            var subscription = new SubscriptionClient(_options.ConnectionString, _options.TopicName, _options.SubscriptionName);
             if (rule != null)
             {
                 await subscription.RemoveDefaultRuleAsync();
@@ -66,10 +66,14 @@ namespace AsbDemo.Topic.Receiver
             return subscription;
         }
 
-        public void ReceiveMessages()
+        public async Task StartReceivingMessages()
         {
-            Helper.WriteLine($"Started receiving messages. Receiver ID: {_receiverId}{Environment.NewLine}", ConsoleColor.Magenta);
-            var options = new MessageHandlerOptions(ExceptionReceivedHandler)
+            await CreateSubscription(_options.TopicName, _options.SubscriptionName);
+            _client = await CreateClient();
+
+            Helper.WriteLine($"Started receiving messages.", ConsoleColor.Magenta);
+
+            var handlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler)
             {
                 AutoComplete = _options.AutoComplete,
                 MaxConcurrentCalls = _options.MaxConcurrentCalls
@@ -91,20 +95,13 @@ namespace AsbDemo.Topic.Receiver
                         priority = msgPriority;
                     }
                 }
-                await ProcessMessage(receivedMessage, priority);
+                await ProcessMessage(receivedMessage, _options.ProcessTime, priority);
 
                 if (!token.IsCancellationRequested)
                 {
                     await _client.CompleteAsync(message.SystemProperties.LockToken);
                 }
-            }, options);
-        }
-
-        private async Task ProcessMessage(DemoMessage message, Priority? priority)
-        {
-            string priorityStr = priority.HasValue ? priority.ToString() : string.Empty;
-            Helper.WriteLine($"Received message: {message.Value}, priority = {priorityStr}", ConsoleColor.White);
-            await Task.Delay(_processTime);
+            }, handlerOptions);
         }
 
         private Task ExceptionReceivedHandler(ExceptionReceivedEventArgs e)
