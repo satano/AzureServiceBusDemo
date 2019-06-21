@@ -7,10 +7,10 @@ namespace AsbDemo.Core
     {
         #region Options
 
-        public string ConnectionString { get; set; }
-        public string QueueName { get; set; }
-        public string TopicName { get; set; }
-        public string SubscriptionName { get; set; }
+        public string ConnectionString { get; set; } = Consts.CstrManagement;
+        public string QueueName { get; set; } = Consts.DemoQueueName;
+        public string TopicName { get; set; } = Consts.DemoTopicName;
+        public string SubscriptionName { get; set; } = Consts.DemoSubscriptionName;
 
         public TimeSpan ProcessTime { get; set; } = DefaultProcessTime;
         public bool AutoComplete { get; set; } = DefaultAutoComplete;

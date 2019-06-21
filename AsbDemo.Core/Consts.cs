@@ -1,4 +1,6 @@
-﻿namespace AsbDemo.Core
+﻿using System;
+
+namespace AsbDemo.Core
 {
     public static class Consts
     {
@@ -10,5 +12,7 @@
         public const string DemoQueueName = "demo-queue";
         public const string DemoTopicName = "demo-topic";
         public const string DemoSubscriptionName = "demo-subscription";
+
+        public static readonly TimeSpan DefaultMessageTimeToLive = TimeSpan.FromMinutes(3);
     }
 }

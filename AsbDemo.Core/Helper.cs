@@ -1,8 +1,11 @@
-﻿using Microsoft.Azure.ServiceBus;
+﻿using MassTransit;
+using MassTransit.Azure.ServiceBus.Core;
+using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 using System;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace AsbDemo.Core
 {
@@ -68,6 +71,39 @@ namespace AsbDemo.Core
                 Console.Write(message);
                 Console.ResetColor();
             }
+        }
+
+        public static async Task<IBusControl> StartBusControl(
+            Action<IServiceBusBusFactoryConfigurator, IServiceBusHost> configurator = null)
+        {
+            Write("Starting service bus ...", ConsoleColor.Magenta);
+            var cstrBuilder = new ServiceBusConnectionStringBuilder(Consts.CstrManagement);
+            IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(busCfg =>
+            {
+                IServiceBusHost host = busCfg.Host(cstrBuilder.Endpoint, hostCfg =>
+                {
+                    hostCfg.SharedAccessSignature(sasCfg =>
+                    {
+                        sasCfg.KeyName = cstrBuilder.SasKeyName;
+                        sasCfg.SharedAccessKey = cstrBuilder.SasKey;
+                        sasCfg.TokenTimeToLive = TimeSpan.FromMinutes(1);
+                    });
+                });
+
+                busCfg.UseJsonSerializer();
+                busCfg.DefaultMessageTimeToLive = TimeSpan.FromMinutes(2);
+                busCfg.EnableDeadLetteringOnMessageExpiration = true;
+                busCfg.LockDuration = TimeSpan.FromSeconds(30);
+                busCfg.AutoDeleteOnIdle = TimeSpan.FromMinutes(10);
+                busCfg.MaxDeliveryCount = 10;
+                busCfg.EnableDuplicateDetection(TimeSpan.FromMinutes(5));
+
+                configurator?.Invoke(busCfg, host);
+            });
+            await bus.StartAsync();
+            WriteLine(" started.", ConsoleColor.Magenta);
+
+            return bus;
         }
     }
 }
