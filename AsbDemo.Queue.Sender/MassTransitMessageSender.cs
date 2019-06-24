@@ -6,40 +6,36 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Sender
 {
-    class MassTransitMessageSender
+    class MassTransitMessageSender : ISender
     {
         private readonly Options _options;
+        private IBusControl _bus;
+        private ISendEndpoint _sender;
 
         public MassTransitMessageSender(Options options)
         {
             _options = options;
         }
 
-        public async Task StartSending()
+        public async Task SendMessagesAsync(CancellationToken token)
         {
-            var tokenSource = new CancellationTokenSource();
-            IBusControl bus = await Helper.StartBusControl();
-            var senderTask = Task.Run(() => SendMessagesAsync(bus, tokenSource.Token));
-
-            Console.ReadLine();
-            Helper.WriteLine("Finishing...", ConsoleColor.Green);
-            tokenSource.Cancel();
-
-            await senderTask;
-            await bus.StopAsync();
-        }
-
-        private async Task SendMessagesAsync(IBusControl bus, CancellationToken token)
-        {
-            Helper.WriteLine($"Started sending messages.{Environment.NewLine}", ConsoleColor.Magenta);
+            _bus = await Helper.StartBusControl();
+            _sender = await _bus.GetSendEndpoint(new Uri(Consts.Endpoint + _options.QueueName));
+            Helper.WriteLine("Started sending messages.", ConsoleColor.Magenta);
             while (!token.IsCancellationRequested)
             {
                 DemoMessage message = Helper.CreateMessage();
-                await bus.Publish<IDemoMessage>(message);
+                await _sender.Send<IDemoMessage>(message);
 
                 Helper.WriteLine($"Message sent: Id = {message.Id}", ConsoleColor.Yellow);
                 await Task.Delay(_options.ProcessTime);
             }
+        }
+
+        public async Task CloseAsync()
+        {
+            _sender = null;
+            await _bus?.StopAsync();
         }
     }
 }
