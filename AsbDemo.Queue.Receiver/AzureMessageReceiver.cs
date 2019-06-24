@@ -1,5 +1,7 @@
 ﻿using AsbDemo.Core;
+using Kros.Azure.ServiceBus.Management;
 using Microsoft.Azure.ServiceBus;
+using Microsoft.Azure.ServiceBus.Management;
 using Newtonsoft.Json;
 using System;
 using System.Text;
@@ -7,22 +9,23 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Receiver
 {
-    class DemoMessageReceiver : IReceiver
+    class AzureMessageReceiver : IReceiver
     {
-        public const int DefaultSleepTimeInSeconds = 1;
-
-        private readonly QueueClient _client;
         private readonly Options _options;
+        private QueueClient _client;
 
-        public DemoMessageReceiver(Options options)
+        public AzureMessageReceiver(Options options)
         {
             _options = options;
-            _client = new QueueClient(options.ConnectionString, options.QueueName);
         }
 
-        public void StartReceivingMessages()
+        public async Task StartReceivingMessages()
         {
+            await CreateQueue();
+            _client = CreateClient();
+
             Helper.WriteLine($"Started receiving messages.{Environment.NewLine}", ConsoleColor.Magenta);
+
             var options = new MessageHandlerOptions(ExceptionReceivedHandler)
             {
                 AutoComplete = _options.AutoComplete,
@@ -37,7 +40,7 @@ namespace AsbDemo.Queue.Receiver
                 }
 
                 DemoMessage receivedMessage = JsonConvert.DeserializeObject<DemoMessage>(Encoding.UTF8.GetString(message.Body));
-                await ProcessMessage(receivedMessage);
+                await Program.ProcessMessage(receivedMessage, _options.ProcessTime);
 
                 if (!token.IsCancellationRequested)
                 {
@@ -46,10 +49,15 @@ namespace AsbDemo.Queue.Receiver
             }, options);
         }
 
-        private async Task ProcessMessage(DemoMessage message)
+        private QueueClient CreateClient() => new QueueClient(_options.ConnectionString, _options.QueueName);
+
+        private async Task CreateQueue()
         {
-            Helper.WriteLine($"Received message: {message.Id} | {message.Value}", ConsoleColor.White);
-            await Task.Delay(_options.ProcessTime);
+            var management = new ManagementClient(_options.ConnectionString);
+            await management.CreateQueueIfNotExistsAsync(_options.QueueName, queue =>
+            {
+                queue.DefaultMessageTimeToLive = Consts.DefaultMessageTimeToLive;
+            });
         }
 
         private Task ExceptionReceivedHandler(ExceptionReceivedEventArgs e)

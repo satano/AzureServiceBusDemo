@@ -1,5 +1,6 @@
 ﻿using AsbDemo.Core;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Sender
@@ -9,25 +10,20 @@ namespace AsbDemo.Queue.Sender
         static async Task Main(string[] args)
         {
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
-
             var options = Options.Parse(args);
-            options.ConnectionString = Consts.CstrManagement;
-            options.QueueName = Consts.DemoQueueName;
 
-            await SendUsingMassTransit(options);
-            //await SendUsingAzure(options);
-        }
+            ISender sender = new AzureMessageSender(options);
 
-        static async Task SendUsingAzure(Options options)
-        {
-            var sender = new DemoMessageSender(options);
-            await sender.StartSending();
-        }
+            Helper.WriteLine($"Sender type: {sender.GetType().Name}", ConsoleColor.Yellow);
+            var tokenSource = new CancellationTokenSource();
+            var senderTask = Task.Run(() => sender.SendMessagesAsync(tokenSource.Token));
 
-        static async Task SendUsingMassTransit(Options options)
-        {
-            var sender = new MassTransitMessageSender(options);
-            await sender.StartSending();
+            Console.ReadLine();
+            Helper.WriteLine("Finishing...", ConsoleColor.Green);
+            tokenSource.Cancel();
+
+            await senderTask;
+            await sender.CloseAsync();
         }
     }
 }

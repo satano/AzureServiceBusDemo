@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AsbDemo.Core\AsbDemo.Core.csproj" />
+    <ProjectReference Include="..\Kros.Azure.ServiceBus\Kros.Azure.ServiceBus.csproj" />
   </ItemGroup>
 
 </Project>

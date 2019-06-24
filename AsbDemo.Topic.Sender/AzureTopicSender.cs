@@ -37,7 +37,7 @@ namespace AsbDemo.Topic.Sender
                 _options.TopicName,
                 s =>
                 {
-                    s.DefaultMessageTimeToLive = TimeSpan.FromMinutes(3);
+                    s.DefaultMessageTimeToLive = Consts.DefaultMessageTimeToLive;
                 });
         }
 
@@ -62,18 +62,12 @@ namespace AsbDemo.Topic.Sender
 
         private Message CreateMessage(Priority priority)
         {
-            DemoMessage demoMsg = Helper.CreateMessage();
-            var sbMessage = new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(demoMsg)))
-            {
-                ContentType = "application/json",
-                MessageId = demoMsg.Id,
-                TimeToLive = Consts.DefaultMessageTimeToLive
-            };
+            Message message = Helper.CreateAzureMessage();
             if (priority != Priority.Default)
             {
-                sbMessage.UserProperties[Helper.PriorityKey] = priority.ToString();
+                message.UserProperties[Helper.PriorityKey] = priority.ToString();
             }
-            return sbMessage;
+            return message;
         }
 
         public async Task CloseAsync() => await _client?.CloseAsync();

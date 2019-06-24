@@ -2,8 +2,9 @@
 
 namespace AsbDemo.Queue.Receiver
 {
-    internal interface IReceiver
+    interface IReceiver
     {
+        Task StartReceivingMessages();
         Task CloseAsync();
     }
 }

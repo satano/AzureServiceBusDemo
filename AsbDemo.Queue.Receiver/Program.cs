@@ -1,5 +1,4 @@
 ﻿using AsbDemo.Core;
-using MassTransit.Transports;
 using System;
 using System.Threading.Tasks;
 
@@ -10,13 +9,12 @@ namespace AsbDemo.Queue.Receiver
         static async Task Main(string[] args)
         {
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
-
             var options = Options.Parse(args);
-            options.ConnectionString = Consts.CstrManagement;
-            options.QueueName = Consts.DemoQueueName;
 
-            //IReceiver receiver = await ReceiveUsingAzure(options);
-            IReceiver receiver = await ReceiveUsingMassTransit(options);
+            IReceiver receiver = new AzureMessageReceiver(options);
+
+            Helper.WriteLine($"Receiver type: {receiver.GetType().Name}", ConsoleColor.Yellow);
+            await receiver.StartReceivingMessages();
 
             Console.ReadLine();
             Helper.WriteLine("Finishing...", ConsoleColor.Green);
@@ -24,18 +22,10 @@ namespace AsbDemo.Queue.Receiver
             await receiver.CloseAsync();
         }
 
-        static async Task<DemoMessageReceiver> ReceiveUsingAzure(Options options)
+        internal static async Task ProcessMessage(IDemoMessage message, TimeSpan processTime)
         {
-            var receiver = new DemoMessageReceiver(options);
-            receiver.StartReceivingMessages();
-            return await Task.FromResult(receiver);
-        }
-
-        static async Task<MassTransitMessageReceiver> ReceiveUsingMassTransit(Options options)
-        {
-            var receiver = new MassTransitMessageReceiver(options);
-            await receiver.StartReceivingMessages();
-            return receiver;
+            Helper.WriteLine($"Received message: {message.Id} | {message.Value}", ConsoleColor.White);
+            await Task.Delay(processTime);
         }
     }
 }
