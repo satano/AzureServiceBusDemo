@@ -23,7 +23,7 @@ namespace AsbDemo.Topic.Receiver
                 subscriptionName,
                 s =>
                 {
-                    s.DefaultMessageTimeToLive = TimeSpan.FromMinutes(3);
+                    s.DefaultMessageTimeToLive = Consts.DefaultMessageTimeToLive;
                 });
         }
 

@@ -1,5 +1,6 @@
 ﻿using MassTransit;
 using MassTransit.Azure.ServiceBus.Core;
+using MassTransit.ConsumerSpecifications;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 using System;
@@ -23,7 +24,7 @@ namespace AsbDemo.Core
             {
                 ContentType = "application/json",
                 MessageId = demoMsg.Id,
-                TimeToLive = timeToLive ?? TimeSpan.FromMinutes(2)
+                TimeToLive = timeToLive ?? Consts.DefaultMessageTimeToLive
             };
         }
 
@@ -86,17 +87,17 @@ namespace AsbDemo.Core
                     {
                         sasCfg.KeyName = cstrBuilder.SasKeyName;
                         sasCfg.SharedAccessKey = cstrBuilder.SasKey;
-                        sasCfg.TokenTimeToLive = TimeSpan.FromMinutes(1);
+                        sasCfg.TokenTimeToLive = Consts.DefaultTokenTimeToLive;
                     });
                 });
 
                 busCfg.UseJsonSerializer();
-                busCfg.DefaultMessageTimeToLive = TimeSpan.FromMinutes(2);
+                busCfg.DefaultMessageTimeToLive = Consts.DefaultMessageTimeToLive;
                 busCfg.EnableDeadLetteringOnMessageExpiration = true;
-                busCfg.LockDuration = TimeSpan.FromSeconds(30);
-                busCfg.AutoDeleteOnIdle = TimeSpan.FromMinutes(10);
-                busCfg.MaxDeliveryCount = 10;
-                busCfg.EnableDuplicateDetection(TimeSpan.FromMinutes(5));
+                busCfg.LockDuration = Consts.DefaultLockDuration;
+                busCfg.AutoDeleteOnIdle = Consts.DefaultAutoDeleteOnIdle;
+                busCfg.MaxDeliveryCount = Consts.DefaultMaxDeliveryCount;
+                busCfg.EnableDuplicateDetection(Consts.DefaultDuplicateDetectionWindow);
 
                 configurator?.Invoke(busCfg, host);
             });

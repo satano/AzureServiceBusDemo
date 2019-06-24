@@ -12,19 +12,15 @@ namespace AsbDemo.Core
         public string TopicName { get; set; } = Consts.DemoTopicName;
         public string SubscriptionName { get; set; } = Consts.DemoSubscriptionName;
 
-        public TimeSpan ProcessTime { get; set; } = DefaultProcessTime;
-        public bool AutoComplete { get; set; } = DefaultAutoComplete;
-        public int MaxConcurrentCalls { get; set; } = DefaultMaxConcurrentCalls;
+        public TimeSpan ProcessTime { get; set; } = Consts.DefaultProcessTime;
+        public bool AutoComplete { get; set; } = false;
+        public int MaxConcurrentCalls { get; set; } = 1;
         public Priority? Priority { get; set; } = null;
         public string Postfix { get; set; } = null;
 
         #endregion
 
         #region Helpers
-
-        public static TimeSpan DefaultProcessTime => TimeSpan.FromSeconds(1);
-        public static bool DefaultAutoComplete => false;
-        public static int DefaultMaxConcurrentCalls => 1;
 
         private static readonly Regex _regex = new Regex("-(?<name>[a-z0-9]+) (?<value>[a-z0-9]+)", RegexOptions.IgnoreCase);
 
