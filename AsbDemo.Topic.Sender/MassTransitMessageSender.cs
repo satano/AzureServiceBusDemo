@@ -23,7 +23,7 @@ namespace AsbDemo.Topic.Sender
             while (!token.IsCancellationRequested)
             {
                 Priority priority = AzureTopicSender.GetPriority();
-                DemoMessage message = Helper.CreateMessage();
+                IDemoMessage message = Helper.CreateMessage();
                 await _bus.Publish<IDemoMessage>(message, ctx =>
                 {
                     ctx.TimeToLive = Consts.DefaultMessageTimeToLive;

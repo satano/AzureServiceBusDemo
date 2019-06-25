@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using GreenPipes.Caching;
+using MassTransit;
 using MassTransit.Azure.ServiceBus.Core;
 using MassTransit.ConsumerSpecifications;
 using Microsoft.Azure.ServiceBus;
@@ -15,11 +16,12 @@ namespace AsbDemo.Core
         public const string PriorityKey = "Priority";
 
         private static int _messageCounter = 0;
+        private static int _messageCounter2 = 0;
 
 
         public static Message CreateAzureMessage(TimeSpan? timeToLive = null)
         {
-            DemoMessage demoMsg = CreateMessage();
+            IDemoMessage demoMsg = CreateMessage();
             return new Message(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(demoMsg)))
             {
                 ContentType = "application/json",
@@ -28,13 +30,24 @@ namespace AsbDemo.Core
             };
         }
 
-        public static DemoMessage CreateMessage()
+        public static IDemoMessage CreateMessage()
         {
             int currentCounter = Interlocked.Increment(ref _messageCounter);
             return new DemoMessage()
             {
                 Id = currentCounter.ToString(),
                 Value = $"Lorem ipsum - {currentCounter}"
+            };
+        }
+
+        public static IDemoMessage2 CreateMessage2()
+        {
+            int currentCounter = Interlocked.Increment(ref _messageCounter2);
+            return new DemoMessage2()
+            {
+                Id = currentCounter.ToString(),
+                Name = "Hello",
+                LastName = $"World - {currentCounter}"
             };
         }
 
