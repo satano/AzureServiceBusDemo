@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Receiver
 {
-    class MassTransitMessageReceiver : IReceiver
+    class MassTransitCommandReceiver : IReceiver
     {
         private readonly Options _options;
         private IBusControl _bus;
 
-        public MassTransitMessageReceiver(Options options)
+        public MassTransitCommandReceiver(Options options)
         {
             _options = options;
         }
 
         public async Task StartReceivingMessages()
         {
-            Helper.WriteLine($"Started sending messages on queue \"{_options.QueueName}\".", ConsoleColor.Magenta);
+            Helper.WriteLine($"Started receiving messages from queue \"{_options.QueueName}\".", ConsoleColor.Magenta);
             var tokenSource = new CancellationTokenSource();
             _bus = await Helper.StartBusControl((busCfg, host) =>
             {

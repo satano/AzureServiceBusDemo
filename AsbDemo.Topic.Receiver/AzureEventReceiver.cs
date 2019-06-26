@@ -49,8 +49,7 @@ namespace AsbDemo.Topic.Receiver
             await CreateSubscription(_options.TopicName, _options.SubscriptionName);
             _client = await CreateClient();
 
-            Helper.WriteLine($"Started receiving messages.", ConsoleColor.Magenta);
-
+            Helper.WriteLine($"Started receiving messages from subscription  \"{_options.SubscriptionName}\".", ConsoleColor.Magenta);
             var handlerOptions = new MessageHandlerOptions(ExceptionReceivedHandler)
             {
                 AutoComplete = _options.AutoComplete,

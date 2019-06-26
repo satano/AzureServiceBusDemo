@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Sender
 {
-    class MassTransitMessageSender : ISender
+    class MassTransitCommandSender : ISender
     {
         private readonly Options _options;
         private IBusControl _bus;
         private ISendEndpoint _sender;
 
-        public MassTransitMessageSender(Options options)
+        public MassTransitCommandSender(Options options)
         {
             _options = options;
         }
@@ -21,7 +21,7 @@ namespace AsbDemo.Queue.Sender
         {
             _bus = await Helper.StartBusControl();
             _sender = await _bus.GetSendEndpoint(new Uri(Consts.Endpoint + _options.QueueName));
-            Helper.WriteLine($"Started sending messages on queueq \"{_options.QueueName}\".", ConsoleColor.Magenta);
+            Helper.WriteLine($"Started sending messages to queue \"{_options.QueueName}\".", ConsoleColor.Magenta);
             bool useMessage2 = false;
             while (!token.IsCancellationRequested)
             {

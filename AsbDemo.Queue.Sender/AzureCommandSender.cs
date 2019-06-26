@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Sender
 {
-    class AzureMessageSender : ISender
+    class AzureCommandSender : ISender
     {
         private readonly Options _options;
         private QueueClient _client;
 
-        public AzureMessageSender(Options options)
+        public AzureCommandSender(Options options)
         {
             _options = options;
         }
@@ -22,7 +22,7 @@ namespace AsbDemo.Queue.Sender
         {
             _client = CreateClient();
             await CreateQueue();
-            Helper.WriteLine($"Started sending messages.", ConsoleColor.Magenta);
+            Helper.WriteLine($"Started sending messages to queue \"{_options.QueueName}\".", ConsoleColor.Magenta);
             while (!token.IsCancellationRequested)
             {
                 Message message = Helper.CreateAzureMessage();

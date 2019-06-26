@@ -1,6 +1,7 @@
 ﻿using AsbDemo.Core;
 using MassTransit;
 using Microsoft.Azure.ServiceBus;
+using System;
 using System.Threading.Tasks;
 
 namespace AsbDemo.Topic.Receiver
@@ -19,6 +20,7 @@ namespace AsbDemo.Topic.Receiver
         {
             _bus = await Helper.StartBusControl((busCfg, host) =>
             {
+                Helper.WriteLine($"Started receiving messages from subscription  \"{_options.SubscriptionName}\".", ConsoleColor.Magenta);
                 busCfg.SubscriptionEndpoint<IDemoMessage>(host, _options.SubscriptionName, endpointCfg =>
                 {
                     endpointCfg.Rule = Program.CreateSubscriptionRule(_options.Priority);

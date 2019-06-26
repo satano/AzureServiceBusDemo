@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Queue.Receiver
 {
-    class AzureMessageReceiver : IReceiver
+    class AzureCommandReceiver : IReceiver
     {
         private readonly Options _options;
         private QueueClient _client;
 
-        public AzureMessageReceiver(Options options)
+        public AzureCommandReceiver(Options options)
         {
             _options = options;
         }
@@ -23,9 +23,7 @@ namespace AsbDemo.Queue.Receiver
         {
             await CreateQueue();
             _client = CreateClient();
-
-            Helper.WriteLine($"Started receiving messages.{Environment.NewLine}", ConsoleColor.Magenta);
-
+            Helper.WriteLine($"Started receiving messages from queue \"{_options.QueueName}\".", ConsoleColor.Magenta);
             var options = new MessageHandlerOptions(ExceptionReceivedHandler)
             {
                 AutoComplete = _options.AutoComplete,

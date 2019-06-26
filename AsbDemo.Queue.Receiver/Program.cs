@@ -11,8 +11,8 @@ namespace AsbDemo.Queue.Receiver
             Helper.WriteLine("Press Enter any time to finish." + Environment.NewLine, ConsoleColor.Green);
             var options = Options.Parse(args);
 
-            //IReceiver receiver = new AzureMessageReceiver(options);
-            IReceiver receiver = new MassTransitMessageReceiver(options);
+            //IReceiver receiver = new AzureCommandReceiver(options);
+            IReceiver receiver = new MassTransitCommandReceiver(options);
 
             Helper.WriteLine($"Receiver type: {receiver.GetType().Name}", ConsoleColor.Yellow);
             await receiver.StartReceivingMessages();
