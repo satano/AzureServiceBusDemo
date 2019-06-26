@@ -1,4 +1,5 @@
 ﻿using AsbDemo.Core;
+using Microsoft.Azure.ServiceBus;
 using System;
 using System.Threading.Tasks;
 
@@ -13,8 +14,8 @@ namespace AsbDemo.Topic.Receiver
             var options = Options.Parse(args);
             UpdateSubscriptionName(options);
 
-            //IReceiver receiver = new AzureSubscriptionReceiver(options);
-            IReceiver receiver = new MassTransitMessageReceiver(options);
+            //IReceiver receiver = new AzureEventReceiver(options);
+            IReceiver receiver = new MassTransitEventReceiver(options);
 
             Helper.WriteLine($"Receiver type: {receiver.GetType().Name}", ConsoleColor.Yellow);
             await receiver.StartReceivingMessages();
@@ -47,10 +48,30 @@ namespace AsbDemo.Topic.Receiver
             {
                 options.SubscriptionName += "-" + options.Postfix;
             }
-            //if (options.Priority.HasValue && (options.Priority != Priority.Default))
-            //{
-            //    options.SubscriptionName += "-" + options.Priority.Value.ToString();
-            //}
+            if (options.Priority.HasValue && (options.Priority != Priority.Default))
+            {
+                options.SubscriptionName += "-" + options.Priority.Value.ToString();
+            }
+        }
+
+        internal static RuleDescription CreateSubscriptionRule(Priority? priority)
+        {
+            RuleDescription rule = null;
+            if (priority.HasValue && (priority != Priority.Default))
+            {
+                string priorityStr = priority.Value.ToString();
+                //var filter = new SqlFilter($"Priority = '{priorityStr}'");
+
+                var correlationFilter = new CorrelationFilter();
+                correlationFilter.Properties["Priority"] = priorityStr;
+
+                rule = new RuleDescription()
+                {
+                    Name = $"Priority-{priorityStr}",
+                    Filter = correlationFilter
+                };
+            }
+            return rule;
         }
     }
 }

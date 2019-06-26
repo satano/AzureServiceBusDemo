@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Topic.Receiver
 {
-    class AzureSubscriptionReceiver : IReceiver
+    class AzureEventReceiver : IReceiver
     {
         private readonly Options _options;
         private SubscriptionClient _client;
@@ -27,29 +27,14 @@ namespace AsbDemo.Topic.Receiver
                 });
         }
 
-        public AzureSubscriptionReceiver(Options options)
+        public AzureEventReceiver(Options options)
         {
             _options = options;
         }
 
         private async Task<SubscriptionClient> CreateClient()
         {
-            RuleDescription rule = null;
-            if (_options.Priority.HasValue && (_options.Priority != Priority.Default))
-            {
-                string priorityStr = _options.Priority.Value.ToString();
-                //Filter filter = new SqlFilter($"Priority = '{priorityStr}'");
-
-                var correlationFilter = new CorrelationFilter();
-                correlationFilter.Properties["Priority"] = priorityStr;
-
-                rule = new RuleDescription()
-                {
-                    Name = $"Priority-{priorityStr}",
-                    Filter = correlationFilter
-                };
-            }
-
+            RuleDescription rule = Program.CreateSubscriptionRule(_options.Priority);
             var subscription = new SubscriptionClient(_options.ConnectionString, _options.TopicName, _options.SubscriptionName);
             if (rule != null)
             {

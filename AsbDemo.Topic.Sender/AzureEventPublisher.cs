@@ -2,30 +2,18 @@
 using Kros.Azure.ServiceBus.Management;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Management;
-using Newtonsoft.Json;
 using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace AsbDemo.Topic.Sender
 {
-    class AzureTopicSender : ISender
+    class AzureEventPublisher : ISender
     {
-        public const int DefaultSleepTimeInSeconds = 1;
-
-        private static int _priorityCounter = 0;
-        public static Priority GetPriority()
-        {
-            _priorityCounter++;
-            Priority priority = _priorityCounter % 3 == 0 ? Priority.High : Priority.Default;
-            return _priorityCounter % 5 == 0 ? Priority.Low : priority;
-        }
-
         private readonly Options _options;
         private TopicClient _client;
 
-        public AzureTopicSender(Options options)
+        public AzureEventPublisher(Options options)
         {
             _options = options;
         }
@@ -51,7 +39,7 @@ namespace AsbDemo.Topic.Sender
             Helper.WriteLine("Started sending messages.", ConsoleColor.Magenta);
             while (!token.IsCancellationRequested)
             {
-                Priority priority = GetPriority();
+                Priority priority = Program.GetPriority();
                 Message message = CreateMessage(priority);
                 await _client.SendAsync(message);
 

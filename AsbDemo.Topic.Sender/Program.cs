@@ -13,8 +13,8 @@ namespace AsbDemo.Topic.Sender
 
             var options = Options.Parse(args);
 
-            //ISender sender = new AzureTopicSender(options);
-            ISender sender = new MassTransitMessageSender(options);
+            //ISender sender = new AzureEventPublisher(options);
+            ISender sender = new MassTransitEventPublisher(options);
 
             Helper.WriteLine($"Sender type: {sender.GetType().Name}", ConsoleColor.Yellow);
             var tokenSource = new CancellationTokenSource();
@@ -26,6 +26,15 @@ namespace AsbDemo.Topic.Sender
 
             await senderTask;
             await sender.CloseAsync();
+        }
+
+        private static int _priorityCounter = 0;
+
+        internal static Priority GetPriority()
+        {
+            _priorityCounter++;
+            Priority priority = _priorityCounter % 3 == 0 ? Priority.High : Priority.Default;
+            return _priorityCounter % 5 == 0 ? Priority.Low : priority;
         }
     }
 }

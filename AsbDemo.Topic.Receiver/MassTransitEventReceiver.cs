@@ -1,15 +1,16 @@
 ﻿using AsbDemo.Core;
 using MassTransit;
+using Microsoft.Azure.ServiceBus;
 using System.Threading.Tasks;
 
 namespace AsbDemo.Topic.Receiver
 {
-    class MassTransitMessageReceiver : IReceiver
+    class MassTransitEventReceiver : IReceiver
     {
         private readonly Options _options;
         IBusControl _bus;
 
-        public MassTransitMessageReceiver(Options options)
+        public MassTransitEventReceiver(Options options)
         {
             _options = options;
         }
@@ -18,8 +19,9 @@ namespace AsbDemo.Topic.Receiver
         {
             _bus = await Helper.StartBusControl((busCfg, host) =>
             {
-                busCfg.ReceiveEndpoint(host, _options.SubscriptionName, endpointCfg =>
+                busCfg.SubscriptionEndpoint<IDemoMessage>(host, _options.SubscriptionName, endpointCfg =>
                 {
+                    endpointCfg.Rule = Program.CreateSubscriptionRule(_options.Priority);
                     endpointCfg.Handler<IDemoMessage>(async context =>
                     {
                         Priority? priority = Program.ParsePriority(context.Headers.Get<string>(Helper.PriorityKey, null));

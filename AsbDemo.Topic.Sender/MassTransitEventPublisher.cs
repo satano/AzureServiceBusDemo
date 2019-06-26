@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace AsbDemo.Topic.Sender
 {
-    class MassTransitMessageSender : ISender
+    class MassTransitEventPublisher : ISender
     {
         private readonly Options _options;
         private IBusControl _bus;
 
-        public MassTransitMessageSender(Options options)
+        public MassTransitEventPublisher(Options options)
         {
             _options = options;
         }
@@ -22,7 +22,7 @@ namespace AsbDemo.Topic.Sender
             Helper.WriteLine("Started sending messages.", ConsoleColor.Magenta);
             while (!token.IsCancellationRequested)
             {
-                Priority priority = AzureTopicSender.GetPriority();
+                Priority priority = Program.GetPriority();
                 IDemoMessage message = Helper.CreateMessage();
                 await _bus.Publish<IDemoMessage>(message, ctx =>
                 {
