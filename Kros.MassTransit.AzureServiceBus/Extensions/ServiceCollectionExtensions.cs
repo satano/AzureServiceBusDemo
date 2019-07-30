@@ -1,9 +1,7 @@
-﻿using GreenPipes;
-using Kros.MassTransit.AzureServiceBus;
+﻿using Kros.MassTransit.AzureServiceBus;
 using MassTransit;
-using MassTransit.Pipeline;
-using MassTransit.Transports;
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -27,23 +25,16 @@ namespace Microsoft.Extensions.DependencyInjection
             TimeSpan tokenTimeToLive,
             Action<IMassTransitForAzureBuilder> busCfg = null)
         {
-            var builder = new MassTransitForAzureBuilder(connectionString, tokenTimeToLive);
-            busCfg?.Invoke(builder);
+            services.AddMassTransit(cfg =>
+            {
+                var assembly = Assembly.GetCallingAssembly();
+                cfg.AddConsumersFromNamespaceContaining(assembly.GetType(), type => type is IConsumer);
 
-            IBusControl bus = Task.Run(async () => await builder.Build()).Result;
-            services.AddSingleton(bus);
-            services.AddSingleton<IBus>(bus);
-            services.AddSingleton<IPublishEndpoint>(bus);
-            services.AddSingleton<IPublishObserverConnector>(bus);
-            services.AddSingleton<ISendEndpointProvider>(bus);
-            services.AddSingleton<ISendObserverConnector>(bus);
-            services.AddSingleton<IConsumePipeConnector>(bus);
-            services.AddSingleton<IRequestPipeConnector>(bus);
-            services.AddSingleton<IConsumeMessageObserverConnector>(bus);
-            services.AddSingleton<IConsumeObserverConnector>(bus);
-            services.AddSingleton<IReceiveObserverConnector>(bus);
-            services.AddSingleton<IReceiveEndpointObserverConnector>(bus);
-            services.AddSingleton<IProbeSite>(bus);
+                var builder = new MassTransitForAzureBuilder(connectionString, tokenTimeToLive);
+                busCfg?.Invoke(builder);
+
+                cfg.AddBus(provider => Task.Run(async () => await builder.Build()).Result);
+            });
 
             return services;
         }

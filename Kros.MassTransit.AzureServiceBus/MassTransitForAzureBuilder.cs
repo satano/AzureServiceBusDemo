@@ -120,6 +120,15 @@ namespace Kros.MassTransit.AzureServiceBus
         #region Consumers
 
         /// <inheritdoc />
+        public IBusConsumerBuilder AddConsumer<TConsumer>(
+            IServiceProvider provider,
+            Action<IConsumerConfigurator<TConsumer>> configure = null) where TConsumer : class, IConsumer
+        {
+            _currentEndpoint.AddConsumerWithDependencies(provider, configure);
+            return this;
+        }
+
+        /// <inheritdoc />
         public IBusConsumerBuilder AddConsumer<TConsumer>(Action<IConsumerConfigurator<TConsumer>> configure = null)
             where TConsumer : class, IConsumer, new()
         {

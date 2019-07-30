@@ -3,13 +3,14 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.8.1</Version>
+    <Version>0.8.3</Version>
     <Authors>KROS a.s.</Authors>
     <Company>KROS a.s.</Company>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Kros.Utils" Version="1.9.0" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="5.5.4" />
     <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="5.5.2" />
   </ItemGroup>
 
