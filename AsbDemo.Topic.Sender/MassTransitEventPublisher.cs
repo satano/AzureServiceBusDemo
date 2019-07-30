@@ -18,7 +18,7 @@ namespace AsbDemo.Topic.Sender
 
         public async Task SendMessagesAsync(CancellationToken token)
         {
-            _bus = await Helper.StartBusControl();
+            _bus = await Helper.StartBusControlFluent();
             Helper.WriteLine("Started sending messages.", ConsoleColor.Magenta);
             while (!token.IsCancellationRequested)
             {

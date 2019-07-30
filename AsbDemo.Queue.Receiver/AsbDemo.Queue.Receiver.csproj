@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AsbDemo.Core\AsbDemo.Core.csproj" />
     <ProjectReference Include="..\Kros.Azure.ServiceBus\Kros.Azure.ServiceBus.csproj" />
+    <ProjectReference Include="..\Kros.MassTransit.AzureServiceBus\Kros.MassTransit.AzureServiceBus.csproj" />
   </ItemGroup>
 
 </Project>

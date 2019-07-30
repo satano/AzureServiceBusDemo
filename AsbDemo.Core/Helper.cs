@@ -1,7 +1,6 @@
-﻿using GreenPipes.Caching;
+﻿using Kros.MassTransit.AzureServiceBus;
 using MassTransit;
 using MassTransit.Azure.ServiceBus.Core;
-using MassTransit.ConsumerSpecifications;
 using Microsoft.Azure.ServiceBus;
 using Newtonsoft.Json;
 using System;
@@ -115,6 +114,15 @@ namespace AsbDemo.Core
                 configurator?.Invoke(busCfg, host);
             });
             await bus.StartAsync();
+            WriteLine(" started.", ConsoleColor.Magenta);
+
+            return bus;
+        }
+
+        public static async Task<IBusControl> StartBusControlFluent()
+        {
+            Write("Starting service bus ...", ConsoleColor.Magenta);
+            IBusControl bus = await new MassTransitForAzureBuilder(Consts.CstrManagement).Build();
             WriteLine(" started.", ConsoleColor.Magenta);
 
             return bus;

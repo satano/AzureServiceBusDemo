@@ -19,7 +19,7 @@ namespace AsbDemo.Queue.Sender
 
         public async Task SendMessagesAsync(CancellationToken token)
         {
-            _bus = await Helper.StartBusControl();
+            _bus = await Helper.StartBusControlFluent();
             _sender = await _bus.GetSendEndpoint(new Uri(Consts.Endpoint + _options.QueueName));
             Helper.WriteLine($"Started sending messages to queue \"{_options.QueueName}\".", ConsoleColor.Magenta);
             bool useMessage2 = false;
