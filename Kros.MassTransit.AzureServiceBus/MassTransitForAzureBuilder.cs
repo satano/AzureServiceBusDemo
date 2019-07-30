@@ -76,7 +76,8 @@ namespace Kros.MassTransit.AzureServiceBus
         #region Config
 
         /// <inheritdoc />
-        public IMassTransitForAzureBuilder ConfigureServiceBusFactory(Action<IServiceBusBusFactoryConfigurator, IServiceBusHost> configurator = null)
+        public IMassTransitForAzureBuilder ConfigureServiceBusFactory(
+            Action<IServiceBusBusFactoryConfigurator, IServiceBusHost> configurator = null)
         {
             _busConfigurator = configurator;
             return this;

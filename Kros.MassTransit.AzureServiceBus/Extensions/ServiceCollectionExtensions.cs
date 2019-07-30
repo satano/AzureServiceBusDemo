@@ -21,16 +21,16 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="tokenTimeToLive">TTL for Azure service bus token.</param>
         /// <param name="busCfg">Service bus configurator.</param>
         /// <returns>MassTransit fluent configuration for Azure service bus.</returns>
-        public static async Task<IServiceCollection> AddMassTransitForAzure(
+        public static IServiceCollection AddMassTransitForAzure(
             this IServiceCollection services,
             string connectionString,
             TimeSpan tokenTimeToLive,
-            Action<IMassTransitForAzureBuilder> busCfg)
+            Action<IMassTransitForAzureBuilder> busCfg = null)
         {
             var builder = new MassTransitForAzureBuilder(connectionString, tokenTimeToLive);
             busCfg?.Invoke(builder);
 
-            IBusControl bus = await builder.Build();
+            IBusControl bus = Task.Run(async () => await builder.Build()).Result;
             services.AddSingleton(bus);
             services.AddSingleton<IBus>(bus);
             services.AddSingleton<IPublishEndpoint>(bus);
@@ -55,10 +55,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="connectionString">Connection string to Azure service bus.</param>
         /// <param name="busCfg">Service bus configurator.</param>
         /// <returns>MassTransit fluent configuration for Azure service bus.</returns>
-        public static async Task<IServiceCollection> AddMassTransitForAzure(
+        public static IServiceCollection AddMassTransitForAzure(
             this IServiceCollection services,
             string connectionString,
-            Action<IMassTransitForAzureBuilder> busCfg)
-            => await services.AddMassTransitForAzure(connectionString, MassTransitForAzureBuilder.DefaultTokenTimeToLive, busCfg);
+            Action<IMassTransitForAzureBuilder> busCfg = null)
+            => services.AddMassTransitForAzure(connectionString, MassTransitForAzureBuilder.DefaultTokenTimeToLive, busCfg);
     }
 }
