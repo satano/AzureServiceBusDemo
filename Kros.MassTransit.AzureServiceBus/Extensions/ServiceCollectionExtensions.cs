@@ -1,8 +1,8 @@
 ﻿using Kros.MassTransit.AzureServiceBus;
+using Kros.Utils;
 using MassTransit;
+using Microsoft.Extensions.Configuration;
 using System;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -15,41 +15,71 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Adds MassTransit fluent configurator for Azure service bus.
         /// </summary>
         /// <param name="services">DI container.</param>
-        /// <param name="connectionString">Connection string to Azure service bus.</param>
-        /// <param name="tokenTimeToLive">TTL for Azure service bus token.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="consumerNamespaceAnchor">Type that specifies topmost namespace in which consumers are located.</param>
         /// <param name="busCfg">Service bus configurator.</param>
         /// <returns>MassTransit fluent configuration for Azure service bus.</returns>
         public static IServiceCollection AddMassTransitForAzure(
             this IServiceCollection services,
-            string connectionString,
-            TimeSpan tokenTimeToLive,
+            IConfiguration configuration,
+            Type consumerNamespaceAnchor,
             Action<IMassTransitForAzureBuilder> busCfg = null)
         {
+            services.Configure<AzureServiceBusOptions>(options => configuration.GetSection("AzureServiceBus").Bind(options));
+            string connectionString = GetConnectionString(configuration);
+            int tokenTTL = GetTokenTTL(configuration);
+
+            RegisterConsumers(services, consumerNamespaceAnchor);
+
             services.AddMassTransit(cfg =>
             {
-                var assembly = Assembly.GetCallingAssembly();
-                cfg.AddConsumersFromNamespaceContaining(assembly.GetType(), type => type is IConsumer);
+                if (consumerNamespaceAnchor != null)
+                {
+                    cfg.AddConsumersFromNamespaceContaining(consumerNamespaceAnchor);
+                }
 
-                var builder = new MassTransitForAzureBuilder(connectionString, tokenTimeToLive);
-                busCfg?.Invoke(builder);
+                cfg.AddBus(provider =>
+                {
+                    var builder = new MassTransitForAzureBuilder(connectionString, TimeSpan.FromSeconds(tokenTTL), provider);
+                    busCfg?.Invoke(builder);
 
-                cfg.AddBus(provider => Task.Run(async () => await builder.Build()).Result);
+                    return builder.Build();
+                });
             });
+            services.AddMassTransitHostedService();
 
             return services;
+        }
+
+        private static string GetConnectionString(IConfiguration configuration)
+            => Check.NotNullOrWhiteSpace(
+                configuration.GetSection("AzureServiceBus:ConnectionString").Value, "AzureServiceBus:ConnectionString");
+
+        private static int GetTokenTTL(IConfiguration configuration)
+            => configuration.GetSection("AzureServiceBus")
+                .GetValue("TokenTimeToLive", (int)MassTransitForAzureBuilder.DefaultTokenTimeToLive.TotalSeconds);
+
+        private static void RegisterConsumers(IServiceCollection services, Type namespaceAnchor)
+        {
+            if (namespaceAnchor != null)
+            {
+                services.Scan(scan =>
+                    scan.FromAssembliesOf(namespaceAnchor)
+                    .AddClasses(c => c.AssignableTo(typeof(IConsumer))));
+            }
         }
 
         /// <summary>
         /// Adds MassTransit fluent configurator for Azure service bus.
         /// </summary>
         /// <param name="services">DI container.</param>
-        /// <param name="connectionString">Connection string to Azure service bus.</param>
-        /// <param name="busCfg">Service bus configurator.</param>
+        /// <param name="configuration">Configuration.</param>
+        /// <param name="busCfg">Additional service bus configurator.</param>
         /// <returns>MassTransit fluent configuration for Azure service bus.</returns>
         public static IServiceCollection AddMassTransitForAzure(
-            this IServiceCollection services,
-            string connectionString,
-            Action<IMassTransitForAzureBuilder> busCfg = null)
-            => services.AddMassTransitForAzure(connectionString, MassTransitForAzureBuilder.DefaultTokenTimeToLive, busCfg);
+                this IServiceCollection services,
+                IConfiguration configuration,
+                Action<IMassTransitForAzureBuilder> busCfg = null)
+                => services.AddMassTransitForAzure(configuration, null, busCfg);
     }
 }

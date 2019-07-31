@@ -6,7 +6,6 @@ using MassTransit.ConsumeConfigurators;
 using Microsoft.Azure.ServiceBus;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Kros.MassTransit.AzureServiceBus
 {
@@ -25,6 +24,10 @@ namespace Kros.MassTransit.AzureServiceBus
         /// TTL for Azure service bus token.
         /// </summary>
         private TimeSpan _tokenTimeToLive;
+        /// <summary>
+        /// DI container.
+        /// </summary>
+        private IServiceProvider _provider;
 
         /// <summary>
         /// Delegate to configure service bus.
@@ -64,10 +67,31 @@ namespace Kros.MassTransit.AzureServiceBus
         /// </summary>
         /// <param name="connectionString">Connection string to Azure service bus.</param>
         /// <param name="tokenTimeToLive">TTL for Azure service bus token.</param>
-        public MassTransitForAzureBuilder(string connectionString, TimeSpan tokenTimeToLive)
+        public MassTransitForAzureBuilder(string connectionString, TimeSpan tokenTimeToLive) :
+            this(connectionString, tokenTimeToLive, null)
+        { }
+
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="connectionString">Connection string to Azure service bus.</param>
+        /// <param name="provider">DI container.</param>
+        public MassTransitForAzureBuilder(string connectionString, IServiceProvider provider) :
+            this(connectionString, DefaultTokenTimeToLive, provider)
+        { }
+
+        /// <summary>
+        /// Ctor.
+        /// </summary>
+        /// <param name="connectionString">Connection string to Azure service bus.</param>
+        /// <param name="tokenTimeToLive">TTL for Azure service bus token.</param>
+        /// <param name="provider">DI container.</param>
+        public MassTransitForAzureBuilder(string connectionString, TimeSpan tokenTimeToLive, IServiceProvider provider)
         {
             _connectionString = Check.NotNullOrWhiteSpace(connectionString, nameof(connectionString));
             _tokenTimeToLive = Check.GreaterThan(tokenTimeToLive, TimeSpan.Zero, nameof(tokenTimeToLive));
+            _provider = provider;
+
             _endpoints = new List<Endpoint>();
         }
 
@@ -120,19 +144,19 @@ namespace Kros.MassTransit.AzureServiceBus
         #region Consumers
 
         /// <inheritdoc />
-        public IBusConsumerBuilder AddConsumer<TConsumer>(
-            IServiceProvider provider,
-            Action<IConsumerConfigurator<TConsumer>> configure = null) where TConsumer : class, IConsumer
-        {
-            _currentEndpoint.AddConsumerWithDependencies(provider, configure);
-            return this;
-        }
-
-        /// <inheritdoc />
         public IBusConsumerBuilder AddConsumer<TConsumer>(Action<IConsumerConfigurator<TConsumer>> configure = null)
-            where TConsumer : class, IConsumer, new()
+            where TConsumer : class, IConsumer
         {
-            _currentEndpoint.AddConsumer(configure);
+            if (typeof(IConsumer).GetConstructor(Type.EmptyTypes) == null)
+            {
+                Check.NotNull(_provider, nameof(_provider));
+                _currentEndpoint.AddConsumerWithDependencies(_provider, configure);
+            }
+            else
+            {
+                _currentEndpoint.AddConsumer(configure);
+            }
+
             return this;
         }
 
@@ -148,7 +172,7 @@ namespace Kros.MassTransit.AzureServiceBus
         #region Build
 
         /// <inheritdoc />
-        public async Task<IBusControl> Build()
+        public IBusControl Build()
         {
             IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(busCfg =>
             {
@@ -157,8 +181,6 @@ namespace Kros.MassTransit.AzureServiceBus
                 ConfigureServiceBus(busCfg, host);
                 AddEndpoints(busCfg, host);
             });
-
-            await bus.StartAsync();
 
             return bus;
         }

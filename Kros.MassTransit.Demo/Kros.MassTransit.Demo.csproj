@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="Kros.Utils" Version="1.9.0" />
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="5.5.2" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="5.5.4" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
   </ItemGroup>

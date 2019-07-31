@@ -20,7 +20,7 @@ namespace AsbDemo.Topic.Receiver
         {
             Helper.Write("Starting service bus ...", ConsoleColor.Magenta);
 
-            _bus = await new MassTransitForAzureBuilder(_options.ConnectionString)
+            _bus = new MassTransitForAzureBuilder(_options.ConnectionString)
                 .ConfigureServiceBusFactory((busCfg, host) =>
                 {
                     Helper.WriteLine($"Started receiving messages from subscription  \"{_options.SubscriptionName}\".",
@@ -34,6 +34,7 @@ namespace AsbDemo.Topic.Receiver
                         await Program.ProcessMessage(context.Message, _options.ProcessTime, priority);
                     })
                 .Build();
+            await _bus.StartAsync();
 
             Helper.WriteLine(" started.", ConsoleColor.Magenta);
         }

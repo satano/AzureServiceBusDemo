@@ -28,7 +28,7 @@ namespace Kros.MassTransit.AzureServiceBus.Endpoints
         /// <typeparam name="TConsumer">Type of message consumer.</typeparam>
         /// <param name="configure">Delegate to configure consumer.</param>
         public abstract void AddConsumer<TConsumer>(Action<IConsumerConfigurator<TConsumer>> configure = null)
-            where TConsumer : class, IConsumer, new();
+            where TConsumer : class, IConsumer;
 
         /// <summary>
         /// Adds new consumer with dependencies to endpoint.

@@ -122,7 +122,9 @@ namespace AsbDemo.Core
         public static async Task<IBusControl> StartBusControlFluent()
         {
             Write("Starting service bus ...", ConsoleColor.Magenta);
-            IBusControl bus = await new MassTransitForAzureBuilder(Consts.CstrManagement).Build();
+
+            IBusControl bus = new MassTransitForAzureBuilder(Consts.CstrManagement).Build();
+            await bus.StartAsync();
             WriteLine(" started.", ConsoleColor.Magenta);
 
             return bus;

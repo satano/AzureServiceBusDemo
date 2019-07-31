@@ -2,7 +2,6 @@
 using MassTransit.Azure.ServiceBus.Core;
 using MassTransit.ConsumeConfigurators;
 using System;
-using System.Threading.Tasks;
 
 namespace Kros.MassTransit.AzureServiceBus
 {
@@ -31,18 +30,7 @@ namespace Kros.MassTransit.AzureServiceBus
         /// <param name="configure">Delagate to configure consumer.</param>
         /// <returns>Self for further configuring of endpoints and its consumers.</returns>
         IBusConsumerBuilder AddConsumer<TConsumer>(Action<IConsumerConfigurator<TConsumer>> configure = null)
-            where TConsumer : class, IConsumer, new();
-
-        /// <summary>
-        /// Adds consumer with dependencies.
-        /// </summary>
-        /// <typeparam name="TConsumer">Consumer for endpoint.</typeparam>
-        /// <param name="provider">Service provider (DI container).</param>
-        /// <param name="configure">Delegate to configure consumer.</param>
-        /// <returns>Self for further configuring of endpoints and its consumers.</returns>
-        IBusConsumerBuilder AddConsumer<TConsumer>(
-            IServiceProvider provider,
-            Action<IConsumerConfigurator<TConsumer>> configure = null) where TConsumer : class, IConsumer;
+            where TConsumer : class, IConsumer;
 
         /// <summary>
         /// Adds consumer for current endpoint.
@@ -99,9 +87,9 @@ namespace Kros.MassTransit.AzureServiceBus
     public interface IBusBuilder
     {
         /// <summary>
-        /// Creates and starts Azure service bus.
+        /// Creates Azure service bus.
         /// </summary>
         /// <returns>Azure service bus.</returns>
-        Task<IBusControl> Build();
+        IBusControl Build();
     }
 }

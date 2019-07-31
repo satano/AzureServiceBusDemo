@@ -39,13 +39,13 @@ namespace Kros.MassTransit.AzureServiceBus.Endpoints
 
         /// <inheritdoc />
         public override void AddConsumer<TConsumer>(Action<IConsumerConfigurator<TConsumer>> configure = null)
-            => _consumers.Add(endpointConfig => endpointConfig.Consumer(configure));
+            => _consumers.Add(endpointConfig => endpointConfig.Consumer(() => Activator.CreateInstance<TConsumer>(), configure));
 
         /// <inheritdoc />
         public override void AddConsumerWithDependencies<TConsumer>(
             IServiceProvider provider,
             Action<IConsumerConfigurator<TConsumer>> configure = null)
-            => _consumers.Add(endpointConfig => endpointConfig.ConfigureConsumer(provider, configure));
+            => _consumers.Add(endpointConfig => endpointConfig.Consumer(provider, configure));
 
         /// <inheritdoc />
         public override void SetEndpoint(IServiceBusBusFactoryConfigurator busCfg, IServiceBusHost host)
