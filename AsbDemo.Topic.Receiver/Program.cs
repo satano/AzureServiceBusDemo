@@ -15,7 +15,7 @@ namespace AsbDemo.Topic.Receiver
             UpdateSubscriptionName(options);
 
             //IReceiver receiver = new AzureEventReceiver(options);
-            IReceiver receiver = new MassTransitEventReceiver(options);
+            IReceiver receiver = new MassTransitEventFluentReceiver(options);
 
             Helper.WriteLine($"Receiver type: {receiver.GetType().Name}", ConsoleColor.Yellow);
             await receiver.StartReceivingMessages();

@@ -2,11 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="5.5.2" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="5.5.4" />
     <PackageReference Include="Microsoft.Azure.ServiceBus" Version="3.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Kros.MassTransit.AzureServiceBus\Kros.MassTransit.AzureServiceBus.csproj" />
   </ItemGroup>
 
 </Project>

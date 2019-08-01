@@ -12,7 +12,7 @@ namespace AsbDemo.Queue.Receiver
             var options = Options.Parse(args);
 
             //IReceiver receiver = new AzureCommandReceiver(options);
-            IReceiver receiver = new MassTransitCommandReceiver(options);
+            IReceiver receiver = new MassTransitCommandFluentReceiver(options);
 
             Helper.WriteLine($"Receiver type: {receiver.GetType().Name}", ConsoleColor.Yellow);
             await receiver.StartReceivingMessages();
