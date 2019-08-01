@@ -180,6 +180,11 @@ namespace Kros.MassTransit.AzureServiceBus
 
                 ConfigureServiceBus(busCfg, host);
                 AddEndpoints(busCfg, host);
+
+                if (_provider != null)
+                {
+                    busCfg.UseHealthCheck(_provider);
+                }
             });
 
             return bus;
