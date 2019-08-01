@@ -1,5 +1,4 @@
 ﻿using Kros.MassTransit.AzureServiceBus;
-using Kros.Utils;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -26,8 +25,6 @@ namespace Microsoft.Extensions.DependencyInjection
             Action<IMassTransitForAzureBuilder> busCfg = null)
         {
             services.Configure<AzureServiceBusOptions>(options => configuration.GetSection("AzureServiceBus").Bind(options));
-            string connectionString = GetConnectionString(configuration);
-            int tokenTTL = GetTokenTTL(configuration);
 
             RegisterConsumers(services, consumerNamespaceAnchor);
 
@@ -40,7 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
                 cfg.AddBus(provider =>
                 {
-                    var builder = new MassTransitForAzureBuilder(connectionString, TimeSpan.FromSeconds(tokenTTL), provider);
+                    var builder = new MassTransitForAzureBuilder(configuration, provider);
                     busCfg?.Invoke(builder);
 
                     return builder.Build();
@@ -49,24 +46,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMassTransitHostedService();
 
             return services;
-        }
-
-        private static string GetConnectionString(IConfiguration configuration)
-            => Check.NotNullOrWhiteSpace(
-                configuration.GetSection("AzureServiceBus:ConnectionString").Value, "AzureServiceBus:ConnectionString");
-
-        private static int GetTokenTTL(IConfiguration configuration)
-            => configuration.GetSection("AzureServiceBus")
-                .GetValue("TokenTimeToLive", (int)MassTransitForAzureBuilder.DefaultTokenTimeToLive.TotalSeconds);
-
-        private static void RegisterConsumers(IServiceCollection services, Type namespaceAnchor)
-        {
-            if (namespaceAnchor != null)
-            {
-                services.Scan(scan =>
-                    scan.FromAssembliesOf(namespaceAnchor)
-                    .AddClasses(c => c.AssignableTo(typeof(IConsumer))));
-            }
         }
 
         /// <summary>
@@ -81,5 +60,16 @@ namespace Microsoft.Extensions.DependencyInjection
                 IConfiguration configuration,
                 Action<IMassTransitForAzureBuilder> busCfg = null)
                 => services.AddMassTransitForAzure(configuration, null, busCfg);
+
+        private static void RegisterConsumers(IServiceCollection services, Type namespaceAnchor)
+        {
+            if (namespaceAnchor != null)
+            {
+                services.Scan(scan =>
+                    scan.FromAssembliesOf(namespaceAnchor)
+                    .AddClasses(c => c.AssignableTo(typeof(IConsumer))));
+            }
+        }
+
     }
 }

@@ -8,33 +8,33 @@ using System.Collections.Generic;
 namespace Kros.MassTransit.AzureServiceBus.Endpoints
 {
     /// <summary>
-    /// Azure service bus receive endpoint.
+    /// Azure service bus subscription endpoint.
     /// </summary>
-    public class ReceiveEndpoint : Endpoint
+    public class SubscriptionEndpoint<TMessage> : Endpoint where TMessage : class
     {
         /// <summary>
         /// Delegate to configure endpoint.
         /// </summary>
-        private Action<IServiceBusReceiveEndpointConfigurator> _configurator;
+        private Action<IServiceBusSubscriptionEndpointConfigurator> _configurator;
         /// <summary>
         /// Delegates to configure individual endpoint consumers.
         /// </summary>
-        private List<Action<IServiceBusReceiveEndpointConfigurator>> _consumers;
+        private List<Action<IServiceBusSubscriptionEndpointConfigurator>> _consumers;
 
         /// <summary>
         /// Ctor.
         /// </summary>
-        /// <param name="queueName">Name of queue.</param>
+        /// <param name="subscriptionName">Name of subscription.</param>
         /// <param name="configurator">Delegate to configure endpoint.</param>
-        public ReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configurator)
+        public SubscriptionEndpoint(string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configurator)
         {
-            _name = Check.NotNullOrWhiteSpace(queueName, nameof(queueName));
+            _name = Check.NotNullOrWhiteSpace(subscriptionName, nameof(subscriptionName));
             _configurator = configurator;
-            _consumers = new List<Action<IServiceBusReceiveEndpointConfigurator>>();
+            _consumers = new List<Action<IServiceBusSubscriptionEndpointConfigurator>>();
         }
 
         /// <inheritdoc />
-        public override void AddConsumer<TMessage>(MessageHandler<TMessage> handler)
+        public override void AddConsumer<TMessage2>(MessageHandler<TMessage2> handler)
             => _consumers.Add(endpointConfig => endpointConfig.Handler(handler));
 
         /// <inheritdoc />
@@ -42,18 +42,18 @@ namespace Kros.MassTransit.AzureServiceBus.Endpoints
             => _consumers.Add(endpointConfig => endpointConfig.Consumer(() => Activator.CreateInstance<TConsumer>(), configure));
 
         /// <inheritdoc />
-        public override void AddConsumerWithDependencies<TConsumer>(
+        public override void AddConsumer<TConsumer>(
             IServiceProvider provider,
             Action<IConsumerConfigurator<TConsumer>> configure = null)
             => _consumers.Add(endpointConfig => endpointConfig.Consumer(provider, configure));
 
         /// <inheritdoc />
         public override void SetEndpoint(IServiceBusBusFactoryConfigurator busCfg, IServiceBusHost host)
-            => busCfg.ReceiveEndpoint(host, _name, endpointConfig =>
+            => busCfg.SubscriptionEndpoint<TMessage>(host, _name, endpointConfig =>
             {
                 _configurator?.Invoke(endpointConfig);
 
-                foreach (Action<IServiceBusReceiveEndpointConfigurator> consumerConfig in _consumers)
+                foreach (Action<IServiceBusSubscriptionEndpointConfigurator> consumerConfig in _consumers)
                 {
                     consumerConfig?.Invoke(endpointConfig);
                 }

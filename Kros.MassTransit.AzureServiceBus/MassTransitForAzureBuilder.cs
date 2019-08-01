@@ -4,6 +4,7 @@ using MassTransit;
 using MassTransit.Azure.ServiceBus.Core;
 using MassTransit.ConsumeConfigurators;
 using Microsoft.Azure.ServiceBus;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 
@@ -83,6 +84,29 @@ namespace Kros.MassTransit.AzureServiceBus
         /// <summary>
         /// Ctor.
         /// </summary>
+        /// <param name="configuration">Service configuration.</param>
+        /// <param name="provider">DI container.</param>
+        public MassTransitForAzureBuilder(IConfiguration configuration, IServiceProvider provider)
+        {
+            var options = new AzureServiceBusOptions();
+            configuration.GetSection("AzureServiceBus").Bind(options);
+
+            Check.NotNull(options, nameof(AzureServiceBus));
+
+
+            _connectionString = Check.NotNullOrWhiteSpace(options.ConnectionString,
+                nameof(AzureServiceBusOptions.ConnectionString));
+            _tokenTimeToLive = (options.TokenTimeToLive > 0
+                ? TimeSpan.FromSeconds(options.TokenTimeToLive)
+                : DefaultTokenTimeToLive);
+            _provider = provider;
+
+            _endpoints = new List<Endpoint>();
+        }
+
+        /// <summary>
+        /// Ctor.
+        /// </summary>
         /// <param name="connectionString">Connection string to Azure service bus.</param>
         /// <param name="tokenTimeToLive">TTL for Azure service bus token.</param>
         /// <param name="provider">DI container.</param>
@@ -150,7 +174,7 @@ namespace Kros.MassTransit.AzureServiceBus
             if (typeof(IConsumer).GetConstructor(Type.EmptyTypes) == null)
             {
                 Check.NotNull(_provider, nameof(_provider));
-                _currentEndpoint.AddConsumerWithDependencies(_provider, configure);
+                _currentEndpoint.AddConsumer(_provider, configure);
             }
             else
             {

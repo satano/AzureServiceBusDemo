@@ -21,10 +21,7 @@ namespace AsbDemo.Queue.Receiver
             Helper.Write("Starting service bus ...", ConsoleColor.Magenta);
 
             _bus = new MassTransitForAzureBuilder(_options.ConnectionString)
-                .ConfigureServiceBusFactory((busCfg, host) =>
-                {
-                    Helper.WriteLine($"Started receiving messages from queue \"{_options.QueueName}\".", ConsoleColor.Magenta);
-                })
+                .ConfigureServiceBusFactory((busCfg, host) => { })
                 .ConfigureQueue(_options.QueueName)
                     .AddConsumer<IDemoMessage>(context =>
                     {
@@ -39,6 +36,9 @@ namespace AsbDemo.Queue.Receiver
                         return Task.Delay(_options.ProcessTime);
                     })
                 .Build();
+
+            Helper.WriteLine($"Started receiving messages from queue \"{_options.QueueName}\".", ConsoleColor.Magenta);
+
             await _bus.StartAsync();
 
             Helper.WriteLine(" started.", ConsoleColor.Magenta);

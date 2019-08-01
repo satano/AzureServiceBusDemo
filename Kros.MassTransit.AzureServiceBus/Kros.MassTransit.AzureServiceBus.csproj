@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>0.8.61</Version>
+    <Version>0.1.0-alpha.1</Version>
     <Authors>KROS a.s.</Authors>
     <Company>KROS a.s.</Company>
   </PropertyGroup>
